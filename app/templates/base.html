@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+{%  block head %}{% endblock %}
+<link rel="stylesheet" type="text/css" href="static/webasset/css/base.css">
+
+<script src="/static/webasset/js/jquery.min.js" type="text/javascript"></script>
+
+<meta charset="UTF-8">
+    {%  block head_content %}{% endblock %}
+</head>
+<body>
+<style>
+    body{
+      background-image: url('static/webasset/img/see_bg.png');
+
+}
+</style>
+    <title>Tree</title>
+    <div class="header">
+
+        {% block link %}{% endblock %}
+    </div>
+    {% block content %}{% endblock %}
+</body>
+</html>
+

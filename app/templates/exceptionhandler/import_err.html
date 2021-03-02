@@ -1,0 +1,22 @@
+{% extends "view.html" %}
+{%block app_content%}
+
+    <style>
+    #content{
+        text-align:    center;
+        align-content: center;
+    }
+    table{
+        border: 1px solid black;
+        margin: 0 auto;
+    }
+    td{
+
+    }
+    </style>
+
+<div id="content">
+<h1>:( There was an error ): </h1>
+{{ html | safe }}
+</div>
+{% endblock%}

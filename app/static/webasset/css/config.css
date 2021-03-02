@@ -1,0 +1,28 @@
+#app_config_div {
+    text-align: center;
+    align-content: center;
+
+}
+
+.app-upload input {
+  display: none;
+    visibility: hidden;
+}
+.app-uninstall input {
+    display: none;
+    visibility: hidden;
+}
+body{
+        font-family:Arial;
+    font-size: 20px;
+}
+.border-banner{
+
+    border: 3px solid #555555;
+    border-radius: 8px;
+
+}
+
+.border-banner:hover {
+    box-shadow: 0 0 3px 1px rgb(236, 86, 164);
+}

@@ -1,0 +1,120 @@
+<script src="/static/webasset/js/jquery.min.js" type="text/javascript"></script>
+
+<style>
+    table{
+    margin: auto;
+    border-radius: 5px;
+    border: 1px solid black;
+    }
+    .wifirow:hover {
+        background-color: #e5e5e5;
+    }
+
+    .wifirow:hover td {
+        background-color: transparent; /* or #000 */
+    }
+    td{
+        padding: 10px;
+    }
+</style>
+<script>
+    var cur_mod;
+    var netui_default;
+    console.log('hello world')
+    jQuery(document).ready(function($) {
+        netui_default = document.getElementById('netui-table').innerHTML;
+    });
+    console.log(netui_default);
+</script>
+<script>
+
+
+
+</script>
+
+{% for network in net_dic.keys() %}
+        {% if net_dic[network]['in-use'] %}
+            <script>
+            // Disconnect from the current network.
+            $(function() {
+                $("#row_{{ network }}").bind('click', function () {
+                    if(cur_mod !== {{ network }}) {
+
+                        {% for n in net_dic.keys() %}
+                            $('#p_{{ n }}').html("{{ net_dic[n]['ssid'] }}");
+                        {% endfor %}
+                        $('#p_{{ network }}').html("{{ net_dic[network]['ssid'] }}<form method='post' action='/netui_disconnect'><input type=hidden name='ssid' value={{ net_dic[network]['ssid'] }}><input type=submit value='Disconnect'></form>");
+                        cur_mod = {{ network }};
+                    }
+                });
+            });
+            </script>
+        {% else %}
+            {% if net_dic[network]['secured'] %}
+                <script>
+                 // Prompt the user for a password, then try to connect.
+                $(function() {
+                    $("#row_{{ network }}").bind('click', function () {
+                        if(cur_mod !== {{ network }}) {
+                            {% for n in net_dic.keys() %}
+                                $('#p_{{ n }}').html("{{ net_dic[n]['ssid'] }}");
+                            {% endfor %}
+                            $('#p_{{ network }}').html("{{ net_dic[network]['ssid'] }} <br><form method='post' action='/netui_connect'><input type='hidden' name='ssid' value='{{ net_dic[network]['ssid'] }}'> <input name=pwd type='password' placeholder='Password'><input type=submit value='Connect'></form>");
+                            cur_mod = {{ network }};
+                        }
+                    });
+                });
+                </script>
+            {% else %}
+                <script>
+                // Offer to connect to an insecure network.
+                $(function() {
+                     $("#row_{{ network }}").bind('click', function () {
+                        if(cur_mod !== {{ network }}) {
+                            {% for n in net_dic.keys() %}
+                                $('#p_{{ n }}').html("{{ net_dic[n]['ssid'] }}");
+                            {% endfor %}
+                            $('#p_{{ network }}').html("{{ net_dic[network]['ssid'] }} <form method='post' action='/netui_connect'><input type='hidden' name='ssid' value='{{ net_dic[network]['ssid'] }}'> <input type=submit value='Connect'></form>");
+                            cur_mod = {{ network }};
+                        }
+                        // ajax stuff
+                    });
+                });
+                </script>
+            {%  endif %}
+        {% endif %}
+{% endfor %}
+
+<table id="netui-table">
+    {% if msg %}
+    <tr><td colspan="3">{{ msg }}</td></tr>
+    {% endif %}
+    <tr>
+        <th colspan="2">Wi-fi networks</th>
+        <th><a href="/config" style="text-decoration: none;">✖️</a></th>
+    </tr>
+
+    {% for network in net_dic.keys() %}
+
+
+        <tr class="wifirow" id=row_{{ network }}>
+        {% if net_dic[network]['in-use'] %}
+            <!-- indicate that we are connected, but also offer a button to disconnect -->
+            <td>✅</td>
+        {% else %}
+            {% if net_dic[network]['secured'] %}
+            <!-- indicate that we are connected, but also offer a button to disconnect -->
+                <td>🔒</td>
+            {% else %}
+                <td></td>
+            <!-- If security is required, lock icon -->
+            {% endif %}
+            <!-- otherwise, connect icon -->
+
+        {% endif %}
+            <td><p id="p_{{ network }}">{{ net_dic[network]['ssid']}}</p></td>
+        <td><img src="static/webasset/img/{{net_dic[network]['bars']}}_bar.jpg" style="width: 30px;"></td>
+        </tr>
+
+    {% endfor %}
+</table>

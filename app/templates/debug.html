@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block link %}
+<a href="/config">⚙️</a>
+<a href="/view">📹</a>
+{% endblock %}
+{% block content %}
+    <link rel="stylesheet" href="static/webasset/terminal/dist/xterm.css" />
+    <script src="static/webasset/terminal/dist/xterm.js"></script>
+    <script src="static/webasset/terminal/dist/addons/terminado/terminado.js"></script>
+    <style>
+    #content{
+        text-align:    center;
+        align-content: center;
+    }
+    table{
+        border: 1px solid black;
+        margin: 0 auto;
+    }
+    td{
+
+    }
+    </style>
+    <div id="content">
+    <iframe src="http://tree.local:5000/bash" width=50% height="450px"></iframe>
+
+    {{ table | safe }}
+
+    </div>
+
+
+{% endblock %}

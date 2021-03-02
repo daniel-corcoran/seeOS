@@ -1,0 +1,302 @@
+<!-- Template for installing, uninstalling, and switching installed apps -->
+{% extends "base.html" %}
+{% block link %}
+<script src="/static/webasset/js/jquery.min.js" type="text/javascript"></script>
+
+{% if update['update'] %}
+<style>
+    /*Update div styles*/
+
+    .update-button{
+        display: inline;
+        border-radius: 8px;
+        color: gray;
+        font-size: 20px;
+
+    }
+    .update-button:hover {
+        background-color: #c4c4c4
+    }
+    .update-container {
+        position: relative;
+        width: 100%;
+    }
+    .update-image {
+      display: block;
+      width: 100%;
+      height: 50px;
+      visibility: hidden;
+    }
+    .update-overlay {
+          position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #008cba;
+        overflow: hidden;
+        width: 0;
+        height: 100%;
+        transition: .5s ease;
+        border-radius: 20px;
+    }
+    .update-text {
+      color: #ffffff;
+      text-shadow: 1px 2px 3px #000000;
+      font-size: 20px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+}
+
+</style>
+<script>
+    //Methods to close, maximize, and open the update bar
+    function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
+    var close_update_bar = function(){
+            async function slideOut_a() {
+                var i;
+                for (i = 100; i >= 0; i--) {
+                    await sleep(1);
+                    document.getElementById("update-overlay-instance").style.width = String(i) + "%";
+
+                }
+            }
+
+            slideOut_a();
+            document.getElementById("update-image-instance").style.height = "1px";
+
+    }
+    var max_update_bar = function(){
+            async function slideOut_b() {
+                var i;
+                for (i = 0; i < 101; i++) {
+                    await sleep(10);
+                    document.getElementById("update-overlay-instance").style.width = String(i) + "%";
+                    document.getElementById("update-image-instance").style.height = String(i * 2) + "px";
+
+                }
+            }
+            slideOut_b();
+    }
+    var show_update_bar = function(){
+        async function slideOut_c() {
+            var i;
+
+            for (i = 0; i < 101; i++) {
+                await sleep(1);
+                document.getElementById("update-overlay-instance").style.width = String(i) + "%";
+                document.getElementById("update-image-instance").style.height = "50px";
+
+        }
+    }
+        slideOut_c();
+    }
+
+    //Apply update action (Bindings for update button)
+    $(function () {
+        $('#update_button_href').bind('click', function(){
+            console.log("update");
+            $.getJSON('/localAPI/update/update_div',
+            function(data) {
+                console.log(data);
+                close_update_bar();
+
+                $("#update-text-instance").html(data.HTML);
+                show_update_bar();
+                // Do something with the data
+            });
+            return false;
+        });
+    });
+    //Apply 'show details' action (Bindings for detail button)
+    $(function () {
+        $('#details_button_href').bind('click', function(){
+            console.log("details");
+            $.getJSON('/localAPI/update/detail_div',
+            function(data) {
+                console.log(data);
+                close_update_bar();
+                $("#update-text-instance").html(data.HTML);
+                max_update_bar();
+
+                // Do something with the data
+            });
+            return false;
+        });
+    });
+    //Apply 'close window' action (Bindings for "close" button)
+    $(function () {
+        $('#close-update-overlay').bind('click', function(){
+                close_update_bar();
+        });
+    });
+
+    show_update_bar();
+
+</script>
+{% endif %}
+
+<table id="header-table-instance" cellspacing="0" cellpadding="0" style="width: 100%;">
+<tr id="header-row-instance">
+    <td width="33%" style="text-align: left">
+        {% if update['update'] %}
+            <div class="update-container" id="update-container-instance">
+            <img src="static/webasset/img/trans-pixel.jpg" class="update-image" id="update-image-instance">
+                <!--TODO: It breaks when we remove this. Why? Get rid of this...-->
+
+                <div class="update-overlay" id="update-overlay-instance">
+                        <div class="update-text" id="update-text-instance">A system update is available. <button class="update-button" id="update_button_href">Update</button> <button class="update-button" id="details_button_href">Details</button>  <button class="update-button" id="close-update-overlay">Ignore</button></div>
+                </div>
+            </div>
+        {%  else %}
+            <p><span id="temperature-span"></span></p>
+        {%  endif %}
+        </td>
+    <td valign="bottom" width="33%" style="text-align: center"><img src="static/webasset/img/tree.png" style="margin-bottom: 0; border: 0; width: 50px; vertical-align: bottom;" hidden></td>
+    <td width="33%">
+        <div class="header-right">
+            <span title="Log off"><a href="/logout"><img src="static/webasset/img/logoff.png" style="width: 25px"></a></span>
+            <span title="Power off"><a href="/power_off">📴</a></span>
+            <span title="Reboot"><a href="/reboot">🔃</a></span>
+            <span title="Developer tools"><a href="/debug" id="debug"><img src="static/webasset/img/terminal.webp" style="width: 25px"></a></span>
+            <span title="Wi-fi"><a href="/{{ netui_dir }}" id="netui" onclick="loadicon()">📶</a></span>
+            <span title="Return to {{ current_app }}"><a href="/view">📹</a></span>
+        </div>
+    </td>
+</tr>
+</table>
+{% endblock %}
+
+
+
+
+
+
+{% block content %}
+    <link rel="stylesheet" type="text/css" href="static/webasset/css/config.css">
+
+<!--
+<div id="install_app_div">
+</div>
+-->
+<div id="app_config_div" >
+<div id="pop_up_content">
+    {{ netui | safe }}
+</div>
+    <p>{{ msg }}</p>
+    <h5>Currently running</h5>
+    <div class="app-upload">
+        <form id='install-form' action="/upload" method="POST" enctype="multipart/form-data">
+            <a href="/view"><img class=border-banner src="static/appstatic/icon/{{ current_app }}.png"></a>
+            <a href="/store"><img class=border-banner src="static/webasset/img/app_store.jpg"></a>
+
+        </form>
+
+    </div>
+
+
+    <h5>Available apps</h5>
+
+    <form action = '/app_change_request' method = "post" enctype="multipart/form-data">
+
+        {% for item in list_apps %}
+            <label for="uninstall-{{item}}">
+                <img class=border-banner src="static/webasset/img/uninstall_app.png">
+            </label>
+            <input class=border-banner type="image" src="static/appstatic/icon/{{item}}.png" name="switch {{ item }}" id="switch">
+            <div class = 'app-uninstall'>
+                <input type="submit" name="uninstall {{ item }}" value="Uninstall" id="uninstall-{{item}}"></p>
+            </div>
+        {% endfor %}
+    </form>
+    <!--List installed apps and set acti
+    ve / uninstall specific apps -->
+
+<style>
+
+
+        #rotate #rotate-imagecontainer{
+            text-align: center;
+            vertical-align:middle;
+            width:100%;
+        }
+        .ani {
+        -moz-transition: all 0.75s ease;
+        -webkit-transition: all 0.75s ease;
+        -ms-transition: all 0.75s ease;
+        -o-transition: all 0.75s ease;
+        transition: all 0.75s ease;
+        }
+    </style>
+<div id="rotate">
+
+    <script>
+    // get default angle on page load
+    var angle = 0;
+    $(function() {
+            $.ajax({
+                type: 'POST',
+                url: '/get_orient',
+                success: function(data) {
+                    console.log("Default page load data:", data);
+                    angle = data.angle;
+                    $('#orient_icon').css("transform", 'rotate(' + angle + 'deg)');
+                },
+                dataType: "json"
+        });
+    });
+    $(function() {
+        $('a#rotate-ccw').bind('click', function() {
+            $.ajax({
+                type: 'POST',
+                url: '/set_orient',
+                data: {direction: -1},
+                success: function(data) {
+                    console.log(data);
+                    angle -= 90;
+                    $('#orient_icon').css("transform", 'rotate(' + angle + 'deg)');
+                },
+                dataType: "json"
+            });
+        });
+    });
+    $(function() {
+        $('a#rotate-cw').bind('click', function() {
+            $.ajax({
+                type: 'POST',
+                url: '/set_orient',
+                data: {direction: 1},
+
+                success: function(data) {
+                    console.log(data);
+                    angle += 90
+                    $('#orient_icon').css("transform", 'rotate(' + angle + 'deg)');
+
+                },
+                dataType: "json"
+            });
+        });
+    });
+    </script>
+    <div id="rotate-imagecontainer">
+         <a href="#" id="rotate-cw"><img src="static/webasset/img/cw.png" class="or-ar"></a><img id="orient_icon" src="static/webasset/img/cam_icon.png" class="ani"> <a href="#" id="rotate-ccw"><img src="static/webasset/img/ccw.png" class="or-ar"></a>
+    </div>
+</div>
+
+{{ update['msg'] }}<br>
+ Copyright 2020 TCI</p>
+</div>
+
+
+
+
+
+
+
+{% endblock %}
+
+

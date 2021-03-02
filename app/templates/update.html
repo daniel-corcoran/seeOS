@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>seeOS Update</title>
+    <script src="/static/webasset/js/jquery.min.js" type="text/javascript"></script>
+
+</head>
+<body>
+
+<style>
+    #update-display {
+        text-align: center;
+    }
+
+
+</style>
+<div id="update-display">
+    <h1 id="headerH1">Applying update <span id="pct"></span>%</h1>
+    <h4><span id="done"></span> / <span id="total"></span> </h4>
+    <div id="download-progress">
+        <div class="loadingbar" style="text-align: center;">
+        </div>
+    </div>
+</div>
+
+
+<script type=text/javascript>
+var refInterval = window.setInterval('tempupdate()', 1000); // 30 seconds
+var done = false;
+
+var tempupdate = function(){
+
+      $.getJSON('/localAPI/update/update_download_status',
+          function(data){
+            $('#total').html(String((data.update_size / 1e6).toFixed(2)) + " mb");
+            $('#done').html(String((data.update_done / 1e6).toFixed(2)) + " mb" );
+            $('#pct').html(data.update_pct);
+            done = data.done;
+            $(".loadingbar").css("width", data.update_pct+ "%")
+          if(data.update_pct === 99){
+              $('#headerH1').html("Rebooting system...");
+              location.href = '/reboot'
+
+          }
+      });
+      return false;
+};
+
+tempupdate();
+</script>
+
+<style>
+    #download-progress {
+        margin: auto;
+        width: 50%;
+        background-color: grey;
+    }
+    .loadingbar {
+        width: 1%;
+        height: 30px;
+        background-color: green;
+    }
+</style>
+
+
+</body>
+</html>

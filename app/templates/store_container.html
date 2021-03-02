@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block link %}
+<a href="/config">⚙️</a>
+{% endblock %}
+
+{% block head_content %}
+
+  <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script> $(function(){
+      $("#includedContent").load("http://{{ store_ip }}/{{ content_path }}");
+    });</script>
+    <!--- This template renders the store -->
+    <meta charset="UTF-8">
+    <title>Store</title>
+{% endblock %}
+
+
+{%  block content %}
+    <hr>
+<div id="includedContent"></div>
+{%  endblock %}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tree</title>
+</head>
+<style>
+    #content{
+        text-align:    center;
+        align-content: center;
+    }
+
+</style>
+
+
+<script>
+    var startTime, endTime;
+    startTime = performance.now();
+
+    function ifServerOnline(ifOnline, ifOffline) {
+        var img = document.body.appendChild(document.createElement("img"));
+        img.onload = function () {
+            ifOnline && ifOnline.constructor == Function && ifOnline();
+        };
+        img.onerror = function () {
+            ifOffline && ifOffline.constructor == Function && ifOffline();
+        };
+        var d = new Date();
+        img.src = "http://tree.local/static/webasset/img/pixel.png?ver=" + d.getTime();
+    }
+
+setTimeout(window.setInterval(function(){
+        console.log("Checking...");
+        ifServerOnline(function () {
+            console.log("ONLINE");
+            document.getElementById("status").innerText = "Currently online (be patient)";
+            endTime = performance.now();
+            var timeDiff = endTime - startTime;
+            timeDiff /= 1000;
+            if (timeDiff > 5) {
+                 window.location.href = "http://tree.local";
+            } else {
+                console.log("We contacted the server, but only ", timeDiff, "seconds have elapsed. Trying again...");
+            }
+
+            //  server online code here
+        },
+        function () {
+            //  server offline code here
+            console.log('.')
+            document.getElementById("status").innerText = "Currently offline (be patient)";
+
+        });
+    }, 1000), 10000);
+
+
+
+
+</script>
+
+
+<body>
+<table id="header-table-instance" cellspacing="0" cellpadding="0" style="width: 100%; border: 2px solid black; border-top: none; border-left: none; border-right: none;">
+<tr id="header-row-instance">
+    <td width="33%" style="text-align: left">
+        </td>
+    <td valign="bottom" width="33%" style="text-align: center"><img src="http://tree.local/static/webasset/img/tree.png" style="margin-bottom: 0; border: 0; width: 50px; vertical-align: bottom;"></td>
+    <td width="33%">
+        <div class="header-right">
+        </div>
+    </td>
+</tr>
+</table>
+
+<div id="content">
+    <span id="status"></span>
+    <p><a href="/">Click here to try connecting manually</a></p>
+</div>
+</body>
