@@ -55,7 +55,7 @@
         {% if i.type == 'vid' %}
             <div style="display:none;" id="video{{ i.hash }}">
             <video class="lg-video-object lg-html5" controls preload="none">
-                <source src="{{ i.src }}" type="video/mp4">
+                <source src="{{ i.src }}" type='video/mp4'>
                 Your browser does not support HTML5 video.
             </video>
             </div>
@@ -78,6 +78,7 @@
     {% endfor %}
 
     </div>
+
 
 
 
@@ -430,6 +431,8 @@
 
     })();
 </script>
+
+
 
 
 

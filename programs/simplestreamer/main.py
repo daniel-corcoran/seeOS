@@ -237,7 +237,7 @@ def gallery():
     src_list.sort()
     thumb_list.sort()
     for src, thumb in zip(src_list, thumb_list):
-        if src in file_format:
+        if file_format in src:
             src_type = 'vid'
         else:
             src_type = 'img'
