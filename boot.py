@@ -1,28 +1,25 @@
-from waitress import serve
-from flask import render_template
-from app import app
-from exceptionhandler import exceptions
-from tools.power import reboot, power_off, restart_client
-from tools import LED
 import importlib
+import math
 import os
-from werkzeug.utils import secure_filename
-from flask import flash, request, redirect, url_for
-from tools.switch import switch
-from tools.uninstall import uninstall
-from tools.install import install
-from flask import jsonify
-from tools import buzzer, temp, login
-from tools.misc import list_apps
-from imutils.video import VideoStream
-import cv2
-import tools.networkui
-from tools.kiwilog import kiwi
-import flask_login
-import flask
-import json
-from tools import orient_video
+import time
+
 import psutil
+from flask import flash, redirect, Response
+from waitress import serve
+from werkzeug.utils import secure_filename
+
+import tools.networkui
+from exceptionhandler import exceptions
+from tools import LED
+from tools import buzzer
+from tools import login
+from tools import camera
+from tools.globals import getGlobalConfig
+from tools.install import install
+from tools.kiwilog import kiwi
+from tools.misc import list_apps
+from tools.modeSelector import *
+from tools.power import reboot, power_off
 
 log = kiwi.instance('sys.boot')
 log.add_log("Welcome to seeOS (COS).")
@@ -36,14 +33,12 @@ sys_update_available = False
 #Check if a system update is available
 
 update = tools.update.check_update_api()
-with open('database/see.json') as f:
-    see_config = json.load(f)
+see_config = getGlobalConfig()
 
 default_app = see_config['default_app']
 
 # TODO: Is there a safer way to do this?
 os.system('nohup python3 tools/terminal.py &')
-
 
 
 def allowed_file(filename):
@@ -59,7 +54,6 @@ log.add_log('attempting to load default app: {}'.format(default_app))
 try:
     my_program = importlib.import_module('programs.{}.main'.format(default_app))
     log.add_log('initial import of default app: {} was a success'.format(default_app))
-
 except Exception as E:
     log.add_exception('import of {} failed, importing exceptionhandler.main instead. Exception: {}'.format(default_app, E))
     my_program = importlib.import_module('exceptionhandler.ui')
@@ -70,15 +64,8 @@ except Exception as E:
 # TODO: Safely remove this.
 ir = False
 
-def irOFF():
-    LED.IRoff()
 
 
-def irON():
-    LED.IRon()
-
-
-import math
 
 def convert_size(size_bytes):
    if size_bytes == 0:
@@ -173,31 +160,6 @@ def upload():
         return 'there was an error. Error: POST method required to install applications. '
 
 
-@app.route("/app_change_request", methods=['GET', 'POST'])
-@flask_login.login_required
-def app_mod_process():
-    # TODO: Do this without restarting the device?
-
-    x = request.form
-    cmd = [i for i in x]
-    print("Command received:", cmd)
-    do = cmd[0].split()[0]
-    target = cmd[0].split()[1]
-    log.add_log('user wants to {} application {}'.format(do, target))
-    # Should be "Switch" x
-    # or "Uninstall x"
-    if do == "switch":
-        # Switch target
-        switch(target)
-        # FIXME
-        reboot()
-        return render_template('connect.html')
-
-    elif do == "uninstall":
-        # Uninstall target
-        uninstall(target)
-        return init_config()
-
 
 @app.route("/reboot")
 @flask_login.login_required
@@ -238,7 +200,11 @@ def debug():
 @app.route("/")
 @flask_login.login_required
 def home_page():
-    return my_program.main()
+    if camera.recording:
+        r = 'true'
+    else:
+        r = 'false'
+    return render_template('base.html', recording=r)
 
 
 @app.route('/config')
@@ -252,9 +218,15 @@ def init_config(up_to_date=False):
 
 @app.route('/view')
 @flask_login.login_required
+# FIXME: why do we need this page
 def init_view():
-    return my_program.main()
+    return home_page()
 
+@app.route("/video_feed")
+def video_feed():
+    log.add_log("/video_feed has been pinged")
+    return Response(camera.generate(),
+                    mimetype="multipart/x-mixed-replace; boundary=frame")
 
 def exception_handler(error=None):
     # Start the exception handler if we can't load the main app.
@@ -271,14 +243,12 @@ def exception_handler(error=None):
 
 
 if __name__ == '__main__':
-    import time
     LED.green()
     time.sleep(0.161)
     LED.blue()
     time.sleep(0.161)
     LED.red()
     time.sleep(0.161)
-
     LED.green()
     buzzer.cooltone()
 

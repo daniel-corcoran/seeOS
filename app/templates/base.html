@@ -3,25 +3,101 @@
 <head>
 {%  block head %}{% endblock %}
 <link rel="stylesheet" type="text/css" href="static/webasset/css/base.css">
+<title>seeOS</title>
 
 <script src="/static/webasset/js/jquery.min.js" type="text/javascript"></script>
 
 <meta charset="UTF-8">
     {%  block head_content %}{% endblock %}
 </head>
-<body>
+
 <style>
+    html {
+        height: 100%;
+    }
     body{
-      background-image: url('static/webasset/img/see_bg.png');
+        margin: 0;
+        height: 100%;
+        font-family: Arial, serif;
+        font-size: 20px;
+    }
+    .main-layout {
+        width: 100%;
+        height: 99%;
+    }
+    .main-layout td {
+
+    }
+    .left {
+        width: 33%;
+    }
+    .right {
+        width: 67%;
+    }
+    .main-layout tr {
+        height: 100%;
+    }
+    #modeSelector {
+        height: 38%;
+        margin-bottom: 5px;
+        margin-right: 5px;
+        -moz-border-radius-bottomright: 50px;
+        border-bottom-right-radius: 50px;
+
+    }
+    #modeControl {
+        height: 62%;
+        margin-right: 5px;
+        margin-top: 5px;
+        -moz-border-radius-topright: 50px;
+        border-top-right-radius: 50px;
+                background-color: #FFFFFF;
+
+    }
+    #video {
+        height: 80%;
+        margin-bottom: 5px;
+    }
+    #videoControl {
+        height: 20%;
+        -moz-border-radius-topleft: 50px;
+        border-top-left-radius: 50px;
+        vertical-align: center;
+        align-content: center;
+        text-align: center;
+
+    }
+    .frameUnit {
+        border: 4px solid rgba(113, 107, 107, 0.5);
+        align-content: center;
+        text-align: center;
+    }
+.videosrc {
+    max-height: 100%;
+    -moz-border-radius-bottomleft: 50px;
+    border-bottom-left-radius: 50px;
 
 }
 </style>
-    <title>Tree</title>
-    <div class="header">
 
-        {% block link %}{% endblock %}
-    </div>
-    {% block content %}{% endblock %}
+<body>
+    <style>
+        body{
+          background-image: url('static/webasset/img/see_bg.png');
+        }
+    </style>
+    <table class="main-layout">
+        <tr>
+            <td class="left">
+                <div id="modeSelector" class="frameUnit">{% include 'frameUnit/_modeSelector.html' %}</div>
+                <div id="modeControl" class="frameUnit">{% include 'frameUnit/_modeControl.html' %}</div>
+            </td>
+            <td class="right">
+                <div id="video">{% include 'frameUnit/_video.html' %}</div>
+                <div id="videoControl">{% include 'frameUnit/_videoControl.html' %}</div>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
 

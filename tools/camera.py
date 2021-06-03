@@ -334,15 +334,6 @@ def record():
     return jsonify({'success': True})
 
 
-@app.route("/video_feed")
-def video_feed():
-    log.add_log("/video_feed has been pinged")
-    return Response(generate(),
-                    mimetype="multipart/x-mixed-replace; boundary=frame")
-
-
-
-
 def generate():
     serv_count = 0
     while True:

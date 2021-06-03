@@ -45,8 +45,12 @@ ff02::2         ip6-allrouters
 sudo reboot now 
 ```
 ... reboot with ```sudo reboot now``` then use ```mdt shell``` to log back in. 
+ ... Find your SSH key with
+```angular2html
+~/.ssh$ cat id_rsa.pub
 
-... Add the SSH Keys with 
+```
+... Add the SSH Keys with (Current as of May 23 2021)
 ```
 echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQChDeAOf7P8+4QA5uoULBl2DwPSkPJwNX0VrYCnqpXf/V/6Av68mGqJhNzmT7eYetmeOUxDBBwK0QGKrcY8gfpO8CnjgGx/R1ThXasSDV5Adz8+3j+VPWVaQBzMarukn+TfEm8g17MrXE+cx1VqJ+8AYMKxEPdPnowhPavGa/z1R3bUPL4yMLCyw50nmsq67kvxiFM8MFlbKBXpmLcpAwIOiLN7cp/g+S1SaIvcKY3kBraWLF3a7IfY1IEanmcbqaio8Y9OskCtZha11L1WbGS/xWd59MKTSOJteEV5zkVFEhy51aKtyoyWVK9/8DCa/vY37e1pta5SkMsB/0o7fbHT7tt/nVZHTlayLpNCSrk/DRnCpJlyUQRs+tB5UZahvoTIYnlQgCJ8WXsKiZGJDny9Lmnb9s3ZYllw0+2IECnzXANCOaq6I0zUmTw+4GMtb3f9wDxsdvOK8hUt/iSCHl580lh0htePdKxiee6VzLoaruQcwulje5+UJIwDinOGAC0/LBDnOb8FU4j/iN3Fjp99BQg9WztQaAqBc4PPRATUZOtmY2ajzCx0hMCKkGCfHdyUYx4qCz8JMT3G4O59pSgl8bSAqbMtsqzeBaeYrETv3QwHwjxmuWiHhwzk8wzTFVsGqrpXWhcwvfshrEX9vJRPfW6Rnl0nkCUD1s4lnw5JQQ== corcordp@mail.uc.edu' >> .ssh/authorized_keys
 ```
@@ -116,7 +120,7 @@ chmod +x /home/mendel/sdcard/tree/bootloader.sh
 /bin/bash /home/mendel/sdcard/tree/bootloader.sh
 exit 0
 
-
+" > /etc/rc.local'
 sudo chmod +x /etc/rc.local
 
 ```
@@ -131,7 +135,8 @@ alias debug="sudo pkill -9 python3; cd ~/sdcard/tree/; python3 boot.py"
 
 ... SCP OS file (from host system.)
 ```
-rsync -avh tree/ mendel@tree.local:/home/mendel/sdcard/tree
+rsync -avh seeOS/ mendel@tree.local:/home/mendel/sdcard/tree
+
 
 ```
 
@@ -142,8 +147,8 @@ sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
 
 sh -c "yes | sudo pip3 install python-periphery https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_aarch64.whl"
 sudo apt-get -y install git build-essential cmake unzip pkg-config libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libgtk-3-dev libatlas-base-dev gfortran python3-dev python3-opencv
-sh -c "yes | sudo pip3 install flask waitress psutil imutils  flask-login PyOpenGL-accelerate dlib face_recognition twilio imgurpython wget tornado terminado"
-
+sh -c "yes | sudo pip3 install flask waitress psutil imutils  flask-login PyOpenGL-accelerate  twilio imgurpython wget tornado terminado"
+dlib face_recognition
 
 # At this point the tutorial is over and you can assemble the device. 
 # TODO: Add assembly directions
