@@ -2,8 +2,8 @@ import cv2
 from app import app
 from flask import request
 import json
-from tools.kiwilog import kiwi
-log = kiwi.instance("tools.orient_video")
+from modules.kiwilog import kiwi
+log = kiwi.instance("modules.orient_video")
 with open('database/see.json') as f:
     os_conf = json.load(f)
     orient = os_conf["counter_clockwise_rotation_count"]

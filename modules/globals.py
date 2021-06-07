@@ -1,4 +1,6 @@
 import json
+from modules import camera
+
 def getGlobalConfig():
     with open('database/see.json') as f:
         see_config = json.load(f)

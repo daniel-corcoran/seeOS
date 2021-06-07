@@ -1,6 +1,6 @@
 from subprocess import Popen, PIPE
-from tools.kiwilog import kiwi
-log = kiwi.instance('tools.temp')
+from modules.kiwilog import kiwi
+log = kiwi.instance('modules.temp')
 from app import app
 import json
 

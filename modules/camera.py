@@ -4,18 +4,18 @@ import time
 from imutils.video import VideoStream
 from app import app
 from flask import Response, render_template
-from tools.orient_video import orient_frame
-from tools.buzzer import enable_buzzer, disable_buzzer, set_freq
-from tools.LED import red, green, blue
+from modules.orient_video import orient_frame
+from modules.buzzer import enable_buzzer, disable_buzzer, set_freq
+from modules.LED import red, green, blue
 
 vs = VideoStream(src=0).start()
 recording = False
 from os import listdir
 import os
-from random import randint
-from tools.kiwilog import kiwi
+from modules.kiwilog import kiwi
 import datetime
 from threading import Thread, Lock
+
 from flask import jsonify
 import time
 import sys
@@ -24,8 +24,7 @@ import sys
 # Capture will probably be easiest.
 # save captures in /database/captures
 
-log = kiwi.instance('apps.simplestreamer')
-log.add_log('loaded simplestreamer dependencies')
+log = kiwi.instance('modules.camera')
 out = None
 eating_leftovers = False
 camera_mutex = Lock()
@@ -204,61 +203,6 @@ t = Thread(target=recording_daemon)
 t.start()
 
 
-@app.route("/delete_all", methods=['POST', 'GET'])
-def delete_img():
-    img_path = 'app/static/appstatic/simplestreamer/'
-    thumb_path = 'app/static/appstatic/simplestreamer/thumbnails/'
-    # Deletes all images in the gallery. This is a debug feature. FIXME
-    delete_thumb_list = listdir(thumb_path)
-    delete_img_list = listdir(img_path)
-    delete_img_list = [x for x in delete_img_list if x != 'thumbnails']  # FIXME: This is trashy
-    log.add_log(f"Deleting {delete_thumb_list} {delete_img_list}")
-    for i in delete_img_list:
-        os.remove(img_path + i)
-    for j in delete_thumb_list:
-        os.remove(thumb_path + j)
-    return gallery()
-
-
-
-@app.route('/gallery')
-def gallery():
-    # Return a gallery view of captured videos and images
-
-    # Return a dic: Int (ordinal) : {thumb_url, src_url}
-    # Get the list of files available to download
-    # Maybe offer a preview?
-    src_list = [f'static/appstatic/simplestreamer/{i}'
-                for i in listdir('app/static/appstatic/simplestreamer') if "thumbnails" not in i]
-    thumb_list = [f'static/appstatic/simplestreamer/thumbnails/{i}'
-                  for i in listdir('app/static/appstatic/simplestreamer/thumbnails')]
-    d = []
-    # TODO: Add type (video or image) to this json
-    src_list.sort()
-    thumb_list.sort()
-    for src, thumb in zip(src_list, thumb_list):
-        if file_format in src:
-            src_type = 'vid'
-        else:
-            src_type = 'img'
-
-
-
-        if src == buffer_file: # If this file is currently being buffered by the buffer thread
-            d.append({'src': 'https://homepages.cae.wisc.edu/~ece533/images/airplane.png', # TODO: Replace with a "buffering pls wait" image
-                      'thumb': thumb,
-                      'type': src_type,
-                      'hash': randint(0, 9999999999),
-                      'size': convert_size(os.path.getsize(f'app/{src}')),
-                      'buffer': True})
-        else:
-            d.append({'src': src,
-                      'thumb': thumb,
-                      'type': src_type,
-                      'hash': randint(0, 9999999999),
-                      'size': convert_size(os.path.getsize(f'app/{src}')),
-                      'buffer': False})
-    return render_template('simplestreamer/gallery.html', file_list=d)
 
 
 @app.route('/capture', methods=['POST'])

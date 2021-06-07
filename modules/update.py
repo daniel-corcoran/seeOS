@@ -2,7 +2,7 @@
 
 import os
 import urllib.request, json
-from tools.kiwilog import kiwi
+from modules.kiwilog import kiwi
 from app import app
 import requests
 import sys

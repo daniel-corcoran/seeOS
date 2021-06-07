@@ -7,14 +7,14 @@ import cv2
 from app import app
 from flask import request, render_template
 import json
-from tools.kiwilog import kiwi
+from modules.kiwilog import kiwi
 import flask_login
 from flask.json import jsonify
-from tools.misc import list_apps
-from tools.globals import default_app
+from modules.misc import list_apps
+from modules.globals import default_app
 
 
-log = kiwi.instance("tools.modeSelector")
+log = kiwi.instance("modules.modeSelector")
 
 
 

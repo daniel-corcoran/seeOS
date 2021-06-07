@@ -3,13 +3,13 @@ import os
 import sys
 import psutil
 import logging
-from tools.buzzer import disable_buzzer
+from modules.buzzer import disable_buzzer
 import threading
 import os
 from app import app
 import time
-from tools.kiwilog import kiwi
-log = kiwi.instance("tools.power")
+from modules.kiwilog import kiwi
+log = kiwi.instance("modules.power")
 # FIXME: This is not secure. We don't want users to have sudo access.
 
 @app.route("/localAPI/power/off", methods=['POST', 'GET'])

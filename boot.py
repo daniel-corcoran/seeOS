@@ -1,4 +1,7 @@
 import importlib
+from app import app
+from exceptionhandler import exceptions
+
 import math
 import os
 import time
@@ -8,18 +11,21 @@ from flask import flash, redirect, Response
 from waitress import serve
 from werkzeug.utils import secure_filename
 
-import tools.networkui
-from exceptionhandler import exceptions
-from tools import LED
-from tools import buzzer
-from tools import login
-from tools import camera
-from tools.globals import getGlobalConfig
-from tools.install import install
-from tools.kiwilog import kiwi
-from tools.misc import list_apps
-from tools.modeSelector import *
-from tools.power import reboot, power_off
+import modules.networkui
+from modules import LED
+from modules import buzzer
+from modules import login
+from modules import camera
+from modules.globals import getGlobalConfig
+from modules.install import install
+from modules.kiwilog import kiwi
+from modules.misc import list_apps
+from modules.modeSelector import *
+from modules import settings
+from modules import systemInformationAPI
+from modules import frontend
+from modules import gallery
+from modules.power import reboot, power_off
 
 log = kiwi.instance('sys.boot')
 log.add_log("Welcome to seeOS (COS).")
@@ -32,23 +38,14 @@ sys_update_available = False
 
 #Check if a system update is available
 
-update = tools.update.check_update_api()
+update = modules.update.check_update_api()
 see_config = getGlobalConfig()
 
 default_app = see_config['default_app']
 
 # TODO: Is there a safer way to do this?
-os.system('nohup python3 tools/terminal.py &')
+os.system('nohup python3 modules/terminal.py &')
 
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# Load default app from database
 
 log.add_log('attempting to load default app: {}'.format(default_app))
 try:
@@ -65,173 +62,11 @@ except Exception as E:
 ir = False
 
 
-
-
-def convert_size(size_bytes):
-   if size_bytes == 0:
-       return "0B"
-   size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-   i = int(math.floor(math.log(size_bytes, 1024)))
-   p = math.pow(1024, i)
-   s = round(size_bytes / p, 2)
-   return "%s %s" % (s, size_name[i])
-
-
-@app.route("/cpu_load", methods=['POST', 'GET'])
-def cpu_load():
-    # Return CPU load statistics via json
-    pct = psutil.cpu_percent(percpu=True)
-    d = {'a': pct[0], 'b': pct[1], 'c': pct[2], 'd': pct[3]}
-    return jsonify(d)
-
-
-@app.route("/memory", methods=['POST', 'GET'])
-def memory():
-    # Return memory
-    mem = psutil.virtual_memory()
-    swap = psutil.swap_memory()
-    d = {'mem_total': convert_size(mem.total),
-         'mem_used':  convert_size(mem.used),
-         'mem_free': convert_size(mem.free),
-         'swap_total': convert_size(swap.total),
-         'swap_used': convert_size(swap.used),
-         'swap_free': convert_size(swap.free)}
-    return jsonify(d)
-
-
-
-@app.route("/disk_capacity", methods=['POST', 'GET'])
-def disk_capacity():
-    # AJAX call to know how much space is remaining on the SD card.
-    try:
-
-        hdd = psutil.disk_usage('/home/mendel/sdcard')
-
-        return jsonify({'total':convert_size(int(hdd.total)),
-                        'used': convert_size(int(hdd.used)),
-                        'free': convert_size(int(hdd.free))})
-    except:
-        hdd = psutil.disk_usage('/')
-
-        return jsonify({'total': convert_size(int(hdd.total)),
-                        'used': convert_size(int(hdd.used)),
-                        'free': convert_size(int(hdd.free))})
-
-@app.route("/update")
-@flask_login.login_required
-def update_helper():
-    p = None
-    # TODO: This needs to be fixed. IMPORTANT
-    LED.blue()
-    LED.green()
-    if p == "Already up to date.":
-        return init_config(up_to_date=True)
-    else:
-        return reboot_helper()
-
-
-@app.route("/upload", methods=['GET', 'POST'])
-@flask_login.login_required
-def upload():
-    print("File uploaded")
-    LED.blue()
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash("No file part")
-            return redirect(request.url)
-        file = request.files['file']
-        print(file)
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash("No selected file")
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.ses_config['UPLOAD_FOLDER'], filename))
-            install(filename)
-
-        else:
-            print("Not allowed")
-        return init_config()
-    else:
-        print(request.method)
-        return 'there was an error. Error: POST method required to install applications. '
-
-
-
-@app.route("/reboot")
-@flask_login.login_required
-def reboot_helper():
-    LED.red()
-    reboot()
-    return render_template("connect.html", action='localAPI/power/reboot')
-
-
-@app.route("/power_off")
-@flask_login.login_required
-def power_off_helper():
-    power_off()
-    return render_template("connect.html", action='localAPI/power/off')
-
-
-@app.route('/debug')
-@flask_login.login_required
-def debug():
-    logs = log.get_exceptions()
-    print(logs)
-    print(len(logs))
-    html = '<h4>Exceptions [ Possibly fatal ]</h4>'
-    for l in logs:
-        html += render_template('exceptionhandler/err_frame.html', src=l, details=logs[l])
-
-    logs = log.get_logs()
-    print(logs)
-    print(len(logs))
-    html += '<h4>Logs [ Non-fatal ] </h4>'
-    for l in logs:
-        html += render_template('exceptionhandler/err_frame.html', src=l, details=logs[l])
-    # If we reach this point, it means there was an exception.
-
-    return render_template("debug.html", table=html)
-
-
-@app.route("/")
-@flask_login.login_required
-def home_page():
-    if camera.recording:
-        r = 'true'
-    else:
-        r = 'false'
-    return render_template('base.html', recording=r)
-
-
-@app.route('/config')
-@flask_login.login_required
-def init_config(up_to_date=False):
-    x = list_apps()
-    print("Update: ", update)
-    return render_template('config.html', list_apps=x, current_app=default_app, ir=ir,
-                           netui_dir='netui', update=update)
-
-
-@app.route('/view')
-@flask_login.login_required
-# FIXME: why do we need this page
-def init_view():
-    return home_page()
-
-@app.route("/video_feed")
-def video_feed():
-    log.add_log("/video_feed has been pinged")
-    return Response(camera.generate(),
-                    mimetype="multipart/x-mixed-replace; boundary=frame")
-
-def exception_handler(error=None):
+def exception_handler(e=None):
     # Start the exception handler if we can't load the main app.
-    if error:
-        exceptions.set_error(error)
+    if e:
+        global error
+        error = e
     try:
         serve(exceptions, host='0.0.0.0', port=80)
     except:
@@ -266,7 +101,7 @@ if __name__ == '__main__':
         except Exception as E:
             log.add_exception('Opening on port 8000 was unsucessful. Details: {}'.format(E))
             LED.red()
-            exception_handler(error=E)
+            exception_handler(E)
 
     log.add_log("Exiting.")
     LED.blue()

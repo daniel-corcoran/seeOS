@@ -101,7 +101,10 @@ function check_if_leftovers(){
                 document.getElementById("gallery").hidden = false
                 document.getElementById("record").hidden = false;
                 document.getElementById("leftovers").hidden = true;
+                document.getElementById("record").src = 'static/webasset/img/record.png'
+
             }
+
 
 
         }
@@ -109,13 +112,13 @@ function check_if_leftovers(){
 }
 
 function recording_daemon(){
+    // FIXME: Need to show
     if(color){
-        document.getElementById("record").style.backgroundColor = "#c15c5c";
-        document.getElementById("record").style.color = "#ffffff";
+        document.getElementById("record").src = 'static/webasset/img/record.png'
         color = false;
     }else{
-        document.getElementById("record").style.backgroundColor = "#ff4b4b";
-        document.getElementById("record").style.color = "#ffffff";
+         document.getElementById("record").src = 'static/webasset/img/record_alt.png'
+
         color = true;
     }
     // This function runs every second while we are recording.
@@ -143,7 +146,6 @@ function record(){
             recording = true;
             document.getElementById("capture").hidden = true;
             document.getElementById("gallery").hidden = true;
-            document.getElementById("record").innerText = "Recording";
             recording_daemon();
             recording_daemon_interval = setInterval(recording_daemon, 1000);
             // Make POST request and confirm response
@@ -156,12 +158,62 @@ leftovers_interval = setInterval(check_if_leftovers, 500)
 
 </script>
 
+<div id="frontendButtons">
+    <img src="static/webasset/img/photo.png" id="capture" onclick="capture()">
+    <img src="static/webasset/img/record.png" id="record" onclick="record();">
+    <img src="static/webasset/img/gallery.png" id="gallery" onclick="gallery();">
+    <button id="leftovers" hidden>Eating <span id="num-leftovers"></span> leftovers</button>
+    <img src="static/webasset/img/settings.png" id="settings" onclick="settings();">
+    <span id="frame-buffer"></span>
 
-<img src="static/webasset/img/photo.png" id="capture" onclick="capture()">
-<img src="static/webasset/img/record.png" id="record" onclick="record();">
-<a href="/gallery"><img src="static/webasset/img/gallery.png"></a>
-<button id="leftovers" hidden>Eating <span id="num-leftovers"></span> leftovers</button>
-<img src="static/webasset/img/settings.png" id="record" onclick="record();">
+</div>
 
-<span id="frame-buffer"></span>
+<span id="galleryAJAX"></span>
+<script>
+
+    var galleryUpdate = function(){
+      $.getJSON('/_gallery',
+          function(data){
+          console.log(data);
+            $('#galleryAJAX').html(data.html);
+      });
+      return false;
+};
+    var gallery = function(){
+        document.getElementById("frontendButtons").hidden = true;
+        galleryUpdate()
+    }
+</script>
+
+<span id="settingsAJAX"></span>
+<script>
+    var settingsUpdate = function(){
+      $.getJSON('/_settings',
+          function(data){
+          console.log(data);
+            $('#settingsAJAX').html(data.html);
+      });
+      return false;
+};
+    var settings = function(){
+        document.getElementById("frontendButtons").hidden = true;
+        settingsUpdate()
+    }
+
+
+    var deleteAll = function(){
+          $.getJSON('/_delete_all',
+          function(data){
+          console.log(data);
+          $('#galleryAJAX').html(data.html);
+      });
+      return false;
+
+    }
+    var home = function(){
+        $('#settingsAJAX').html('');
+        $('#galleryAJAX').html('');
+        document.getElementById("frontendButtons").hidden = false;
+    }
+</script>
 

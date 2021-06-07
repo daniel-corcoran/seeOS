@@ -1,34 +1,18 @@
-<h5>Currently running</h5>
-<div class="app-upload">
-<form id='install-form' action="/upload" method="POST" enctype="multipart/form-data">
-    <a href="/view"><img class=border-banner src="static/appstatic/icon/{{ current_app }}.png"></a>
-    <!--<a href="/store"><img class=border-banner src="static/webasset/img/app_store.jpg"></a>--> <!--Removing this for now -->
-
-</form>
-
-</div>
 
 
-<h5>Available apps</h5>
 
 <form action = '/app_change_request' method = "post" enctype="multipart/form-data">
 
     {% for item in list_apps %}
-        <div class="app-row">
-            <!--<label for="uninstall-{{item}}">
-                <img class=border-banner src="static/webasset/img/uninstall_app.png">
-            </label> -->
+        <span class="app-row">
+
             <input class=border-banner type="image" src="static/appstatic/icon/{{item}}.png" name="switch {{ item }}" id="switch">
-            <!-- <div class = 'app-uninstall'>
-                <input type="submit" name="uninstall {{ item }}" value="Uninstall" id="uninstall-{{item}}"></p>
-            </div> -->
-        </div>
+
+        </span>
     {% endfor %}
 </form>
 <style>
-    .app-row {
-        width: 100%;
-    }
+
 #app_config_div {
 text-align: center;
 align-content: center;
@@ -50,8 +34,9 @@ body{
 .border-banner{
 
     border: 3px solid #555555;
-    border-radius: 8px;
-    width: 75%
+    border-radius: 30px;
+    width: 40%;
+    height: 100px;
 
 
 }

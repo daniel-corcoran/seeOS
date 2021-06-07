@@ -12,7 +12,7 @@ class instance:
     def add_log(self, msg):
         global log
         global exc
-        print('[INFO]\t' + self.src + '\t' +  msg + '\t' + str(datetime.now()))
+    #!print('[INFO]\t' + self.src + '\t' +  msg + '\t' + str(datetime.now()))
         if self.src not in log:
             log[self.src] = {str(datetime.now()): msg}
         else:

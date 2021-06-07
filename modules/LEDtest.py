@@ -1,5 +1,5 @@
 # Test the LEDs by running them in a cycle.
-from tools import LED
+from modules import LED
 from time import sleep
 while True:
     LED.red()

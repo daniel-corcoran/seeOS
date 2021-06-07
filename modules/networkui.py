@@ -1,15 +1,15 @@
 ## Network management UI
-# Provides tools for wi-fi setup
+# Provides modules for wi-fi setup
 from app import app
 from flask import render_template, request
 import os
-from tools.misc import list_apps
-from tools.kiwilog import kiwi
+from modules.misc import list_apps
+from modules.kiwilog import kiwi
 from subprocess import PIPE, Popen
-from tools.update import check_update_api
+from modules.update import check_update_api
 import json
 
-log = kiwi.instance('tools.networkui')
+log = kiwi.instance('modules.networkui')
 
 with open('database/see.json') as f:
     see_config = json.load(f)

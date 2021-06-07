@@ -1,86 +1,7 @@
-{% extends "view.html" %}
-{%  block head %}
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <link href="https://cdn.rawgit.com/sachinchoolur/lightgallery.js/master/dist/css/lightgallery.css" rel="stylesheet">
-<style>
-.video-thumb {
-    border: 5px solid red;
-}
-</style>
-
-
-
-
-{% endblock %}
-
-
-{% block app_content %}
-
-
-    <style>
-    #gallery-header {
-        text-align: center;
-        align-content: center;
-    }
-    #lightgallery {
-        align-content: center;
-        text-align: center;
-    }
-    #gallery-controls {
-        align-content: center;
-        text-align: center;
-    }
-
-    </style>
-
-    <div id="gallery-header">
-        <h1>Gallery</h1>
-    </div>
-    <div id="gallery-controls">
-        <a href="/">Go back</a>
-        <a href="/delete_all">[Delete All]</a>
-    </div>
-
-
-
-    <!-- hidden video elem div -->
-
-
-
-    <div id="lightgallery">
-    {% for i in file_list %}
-    <!-- only load videos -->
-        {% if i.type == 'vid' %}
-            <div style="display:none;" id="video{{ i.hash }}">
-            <video class="lg-video-object lg-html5" controls preload="none">
-                <source src="{{ i.src }}" type='video/mp4'>
-                Your browser does not support HTML5 video.
-            </video>
-            </div>
-        {% endif %}
-    {% endfor %}
-
-    {%  for i in file_list %}
-        {% if i.type == 'vid' %}
-            <!-- video blocc -->
-            <!-- todo: can we get video length as well-->
-            <a data-poster="{{ i.thumb }}" data-html="#video{{ i.hash }}"><img src="{{ i.thumb }}" class="video-thumb" title="size {{ i.size }}"></a>
-        {% else %}
-            <!-- img blocc -->
-          <a href="{{ i.src }}">
-            <img src="{{ i.thumb }}" class="img-thumb" title="size {{ i.size }}"/>
-
-          </a>
-
-        {% endif %}
-    {% endfor %}
-
-    </div>
-
-
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.11/js/lightgallery-all.min.js"></script>
 
@@ -432,10 +353,79 @@
     })();
 </script>
 
+<style>
+.video-thumb {
+    border: 5px solid #6200ff;
+
+}
+#lightgallery img {
+    border-radius: 20px;
+    margin: 10px;
+}
+</style>
+
+
+
+    <style>
+    #gallery-header {
+        text-align: center;
+        align-content: center;
+    }
+    #lightgallery {
+        align-content: center;
+        text-align: center;
+    }
+    #gallery-controls {
+        align-content: center;
+        text-align: center;
+    }
+
+    </style>
+
+    <div id="gallery-header">
+    </div>
+    <div id="gallery-controls">
+        <button onclick="home()">Go home</button>
+        <button onclick="deleteAll()">Delete All</button>
+    </div>
+
+
+
+    <!-- hidden video elem div -->
+
+
+
+    <div id="lightgallery">
+    {% for i in file_list %}
+    <!-- only load videos -->
+        {% if i.type == 'vid' %}
+            <div style="display:none;" id="video{{ i.hash }}">
+            <video class="lg-video-object lg-html5" controls preload="none">
+                <source src="{{ i.src }}" type='video/mp4'>
+                Your browser does not support HTML5 video.
+            </video>
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    {%  for i in file_list %}
+        {% if i.type == 'vid' %}
+            <!-- video blocc -->
+            <!-- todo: can we get video length as well-->
+            <a data-poster="{{ i.thumb }}" data-html="#video{{ i.hash }}"><img src="{{ i.thumb }}" class="video-thumb" title="size {{ i.size }}"></a>
+        {% else %}
+            <!-- img blocc -->
+          <a href="{{ i.src }}">
+            <img src="{{ i.thumb }}" class="img-thumb" title="size {{ i.size }}"/>
+
+          </a>
+
+        {% endif %}
+    {% endfor %}
+
+    </div>
 
 
 
 
-
-{% endblock %}
 

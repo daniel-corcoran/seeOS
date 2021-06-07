@@ -12,5 +12,5 @@ def start():
 
     terminal = Terminal(terminal_host)
     terminal.add_terminal('/bash', ['bash'])
-    terminal.run(port=5000, host='0.0.0.0')
+    #terminal.run(port=5000, host='0.0.0.0')
 start()

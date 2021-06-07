@@ -1,5 +1,5 @@
-from tools.kiwilog import kiwi
-log = kiwi.instance('tools.LED')
+from modules.kiwilog import kiwi
+log = kiwi.instance('modules.LED')
 try:
     from periphery import GPIO
     cur_col = ''
