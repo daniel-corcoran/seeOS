@@ -7,7 +7,7 @@ from flask import Response, render_template
 from modules.orient_video import orient_frame
 from modules.buzzer import enable_buzzer, disable_buzzer, set_freq
 from modules.LED import red, green, blue
-
+from modules import kernel
 vs = VideoStream(src=0).start()
 recording = False
 from os import listdir
@@ -95,6 +95,7 @@ def frame_cap_daemon():
         a = datetime.datetime.now()
         camera_mutex.acquire()
         frame = orient_frame(vs.read())
+        frame = kernel._async_overlay(frame)
         suma += (datetime.datetime.now() - a)
 
         # print("B")

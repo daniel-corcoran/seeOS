@@ -1,6 +1,6 @@
 # Install an application that has been uploaded
 import os, tarfile, shutil
-from modules.switch import switch
+from modules.kernel import switch
 def install(path):
     print("Install file", path )
     #File is located in /database/tmp

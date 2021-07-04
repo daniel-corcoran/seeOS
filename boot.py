@@ -49,7 +49,7 @@ os.system('nohup python3 modules/terminal.py &')
 
 log.add_log('attempting to load default app: {}'.format(default_app))
 try:
-    my_program = importlib.import_module('programs.{}.main'.format(default_app))
+    #my_program = importlib.import_module('programs.{}.main'.format(default_app))
     log.add_log('initial import of default app: {} was a success'.format(default_app))
 except Exception as E:
     log.add_exception('import of {} failed, importing exceptionhandler.main instead. Exception: {}'.format(default_app, E))

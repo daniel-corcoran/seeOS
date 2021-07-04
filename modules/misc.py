@@ -8,7 +8,7 @@ def default_app():
 
 def list_apps():
     default_app_tmp = default_app()
-    list_of_apps = os.listdir('programs')
+    list_of_apps = os.listdir('program')
     new_l = []
     for x in list_of_apps:
         if x != "__pycache__" and x != default_app_tmp:
