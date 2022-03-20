@@ -6,14 +6,18 @@ seeOS is an operating system designed to run on homemade AI cameras, specificall
 
 Tree Camera is an open-source camera hardware platform based on the Google Coral platform. Using the on-board edge TPU (tensor processing unit) it can run machine learning applications quickly and efficiently on-device. 
 
-The promise of modern AI cameras to augment manufacturing, enhance safety and security, and enable novel applications has been hindered by general distrust in large corporate interests. We cannot trust the parties who manufacture these devices (Amazon Blink/Ring, Google Nest, Etc) to monitor and analyze sensitive parts of our life unless the devices are made completely open source. 
+The promise of modern AI cameras to augment manufacturing, enhance safety and security, and enable novel applications has been hindered by general distrust towards the parties manufacturing these devices. The parties who manufacture these devices (Amazon Blink/Ring, Google Nest, Etc) have in essence unbridled liberty to monitor, record, and analyze sensitive parts of our lives because these devices are not open source.
 
 As an analogy: Suppose we removed the ingredients list from everything at the grocery. 
-Would you consume a manufactured product if it's constituents were not disclosed publicly?
+Would you consume a manufactured product if it's constituents were not disclosed publicly or regulated? 
+Would you send your child to a school if you were withheld details about what subjects, textbooks, or ideologies the students were taught?
 
 
-Why would you buy a security camera for your home, that truly has access to some of the most sensitive information in your life, if you could not know where exactly the information it collects is getting sent?
-The information collected about you by your own cameras could be sent to any government, used by special interests to manipulate you through targeted ads or propaganda, or for even more potentially dastardly orwellian operations.
+This is a rough approximation of the situation I'm trying to address here, but the point here is that when we allow closed-source "black box" systems to access an intimate part of our life, we have no assurances that that access will not be abused by it's holders to psychologically manipulate and coerce us.  
+
+
+When you buy a stick-up camera for your home, that device unarguably has access to some of the most sensitive information about your life, are you OK not knowing where exactly the information it collects is going?
+The information collected about you by your own cameras could be sent to any government, used by special interests to manipulate you through targeted ads or psychological means, or for even more potentially dastardly orwellian operations.
 
 Moreover, the cameras these companies create are either extremely simplified (where useful AI features are restricted for the sake of user friendliness), or highly technical (granting users a high degree of autonomy but without a standardized packaging system or user interface)
 
@@ -25,7 +29,7 @@ We hope you enjoy using seeOS and look forward to a future where AI video proces
 
 ### Requirements
 
-  >1. A computer running linux
+  >1. A computer running Ubuntu 20
   >2. 3D printer or means to acquire 3D printed parts
      1. STL files are included for the Ender 3 model of printer
   >3. [Google Coral Dev Board](https://coral.ai/products/dev-board/)
