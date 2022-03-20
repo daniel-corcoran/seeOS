@@ -1,6 +1,4 @@
 
-![seeOS](TreeCamera/static/seeOS.png)
-
 ![seeOSDesktop](TreeCamera/static/seeOStransparent.png)
 ### What is this? / Manifesto
 
