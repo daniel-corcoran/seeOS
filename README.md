@@ -1,20 +1,23 @@
-# README
 
+![seeOS](TreeCamera/static/seeOS.png)
 
-### What is this?
+![seeOSDesktop](TreeCamera/static/seeOStransparent.png)
+### What is this? / Manifesto
 
-seeOS is an operating system designed to run on the Tree Camera. 
+seeOS is an operating system designed to run on homemade AI cameras, specifically the Tree Camera. 
 
 Tree Camera is an open-source camera hardware platform based on the Google Coral platform. Using the on-board edge TPU (tensor processing unit) it can run machine learning applications quickly and efficiently on-device. 
 
-The promise of modern AI cameras to augment manufacturing, enhance safety and security, and enable novel applications has been hindered by general distrust in large corporate interests. We cannot trust the megacorporations who manufacture these devices (Ring, Flir, Etc) to monitor and analyze sensitive areas of our life and business unless the tools are made completely open source. 
+The promise of modern AI cameras to augment manufacturing, enhance safety and security, and enable novel applications has been hindered by general distrust in large corporate interests. We cannot trust the parties who manufacture these devices (Amazon Blink/Ring, Google Nest, Etc) to monitor and analyze sensitive parts of our life unless the devices are made completely open source. 
 
-Think about it this way: Imagine if the hood of your new car was completely bolted down. 
-You wouldn't buy a car that you couldn't look under the hood to make sure your oil levels were in check. 
+As an analogy: Suppose we removed the ingredients list from everything at the grocery. 
+Would you consume a manufactured product if it's constituents were not disclosed publicly?
+
+
 Why would you buy a security camera for your home, that truly has access to some of the most sensitive information in your life, if you could not know where exactly the information it collects is getting sent?
 The information collected about you by your own cameras could be sent to any government, used by special interests to manipulate you through targeted ads or propaganda, or for even more potentially dastardly orwellian operations.
 
-Moreover, the platforms these companies do create are either extremely simplified (where useful AI features are restricted for the sake of user friendliness), or highly technical (granting users a high degree of autonomy but without a standardized packaging system or user interface)
+Moreover, the cameras these companies create are either extremely simplified (where useful AI features are restricted for the sake of user friendliness), or highly technical (granting users a high degree of autonomy but without a standardized packaging system or user interface)
 
 Tree Camera and seeOS provide an alternative to the sparse landscape of smart cameras that is both open-source and user friendly. We want users to have a functional, friendly product that belongs to them. 
 
@@ -36,9 +39,72 @@ We hope you enjoy using seeOS and look forward to a future where AI video proces
 
 ## Stage A: Assemble Camera
 
+### 3D print all STL files [here](TreeCamera/stl). 
+
+Print all files on 100% infill at med-low resolution.  
+A point of focus in the future would be optimizing the tensile strength of the device.
+#### [001_box](TreeCamera/stl/001_box.stl)
+![001_box front](TreeCamera/img/001_box_front.png)
+![001_box rear](TreeCamera/img/001_box_rear.png)
+
+#### [002_back](TreeCamera/stl/002_back.stl)
+![002_back](TreeCamera/img/002_back.png)
+
+#### [003_shaft_base](TreeCamera/stl/003_shaft_base.stl)
+![003_shaft_base](TreeCamera/img/003_shaft_base.png)
+
+#### [004_ball](TreeCamera/stl/004_ball.stl)
+![004_ball](TreeCamera/img/004_ball.png)
+
+#### [005_screw](TreeCamera/stl/005_screw.stl)
+![005_screw](TreeCamera/img/005_screw.png)
+
+#### [006_screw_pad](TreeCamera/stl/006_screw_pad.stl)
+![006_screw_pad](TreeCamera/img/006_screw_pad.png)
+
+#### [007_vice_body](TreeCamera/stl/007_vice_body.stl)
+![007_vice_body](TreeCamera/img/007_vice_body.png)
+
+### 2. Assemble the ball/clamp mechanism
+
+![ball clamp assembley](TreeCamera/static/ball_clamp_assembley.jpg)
+
+#### A: 004_ball
+#### B  60mm x 5mm threaded shaft
+#### C: 007_vice_body 
+#### D: 006_screw_pad
+#### E: 005_screw
+#### F: 003_shaft_base
+
+###3: Assemble Camera
+
+#### Wire coal device according to this schematic: 
+![schematic](TreeCamera/static/wiring.png)
+
+#### Connect Camera Module to coral
+![camera_to_coral](TreeCamera/static/20220320_135551.jpg)
+
+#### Put LED in position with a dot of hot glue
+![led_position](TreeCamera/static/20220320_135844.jpg)
+
+#### Attach camera module to inside of case
+![camera_case_step1](TreeCamera/static/20220320_135530.jpg)
+![camera_case_step2](TreeCamera/static/20220320_135355.jpg)
+
+##### At this point if you haven't flashed your board yet, skip to stage B and C to flash the operating system and verify your hardware is all connected properly before further assembling the device. 
+
+#### Place coral fan-side-down in case
+![coral_in_case](TreeCamera/static/20220320_135302.jpg)
+![coral_in_case_screwed](TreeCamera/static/20220320_135126.jpg)
+
+#### Attach back
+![attatch_back](TreeCamera/static/20220320_135854.jpg)
+
+#### Connect back to ball/clamp. 
+![treeside](TreeCamera/static/treeside.png)
 
 
-
+####Tree Camera is now assembled. 
 
 #Stage B: Configure your workstation
 
@@ -196,7 +262,6 @@ echo 'alias debug="sudo pkill -9 python3; cd ~/sdcard/tree/; python3 boot.py"' >
 ```
 rsync -avh seeOS/ mendel@tree.local:/home/mendel/sdcard/tree
 
-
 ```
 
 ... connect it to wifi using nmtui. 
@@ -204,18 +269,10 @@ rsync -avh seeOS/ mendel@tree.local:/home/mendel/sdcard/tree
 ```
 sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
 
-# TODO: THIS STEP MAY NOW BE UNNECESSARY AS MODERN OS HAS IT INCORPORATED!!!
-＃大切な！　これは必要じゃなくなった。最近のOSはTFLiteとpython-peripheryを予め持っている
-
 sudo apt-get -y install git build-essential cmake unzip pkg-config libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libgtk-3-dev libatlas-base-dev gfortran python3-dev python3-opencv
-sh -c "yes | sudo pip3 install flask waitress psutil imutils  flask-login PyOpenGL-accelerate  twilio imgurpython wget tornado terminado"
-# DONT RUN dlib face_recognition
+sh -c "yes | sudo pip3 install flask waitress psutil imutils  flask-login PyOpenGL-accelerate  twilio imgurpython wget tornado terminado dlib face_recognition"
 
 # At this point the setup is over and you can assemble the device. 
-# TODO: Add assembly directions
-# TODO: Include LED and piezo test as part of setup process
-# Connect over wi-fi first before running this. We need to start setting up other boards. 
-# TODO: LED/Piezo test script? 
 
 ```
 <h1>Help</h1>
@@ -227,14 +284,3 @@ this puts the board in fastboot mode, so you can re-flash the operating system
 ```
 To restart the board into fastboot mode. This is effectively a factory reset. 
 (I've probably had to do this 10,000 times.)
-
-# TODO: Make bash script? 
-# TODO: remove my wi-fi from devices
-# TODO: remove my wi-fi from devices
-# TODO: make simplestreamer default application
-# TODO: make testing script for LED, Piezo, and camera
-
-
-# These are terminal tools
-
-refe to setup_v2.md for this
