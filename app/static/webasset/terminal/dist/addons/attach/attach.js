@@ -1,5 +1,5 @@
 /**
- * Implements the attach method, that attaches the terminal to a WebSocket stream.
+ * Implements the attach method, that attaches the terminal to a WebSocket Video_Streaming.
  * @module xterm/addons/attach/attach
  * @license MIT
  */

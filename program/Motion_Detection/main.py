@@ -1,3 +1,4 @@
+
 # import the necessary packages
 import numpy as np
 import imutils
@@ -149,3 +150,32 @@ t = threading.Thread(target=thread, args=(
 		32,))
 t.daemon = True
 t.start()
+
+_frame = None
+
+
+def _overlay(frame):
+    return frame
+
+
+def _calculate_overlay(frame):
+    global _overlay
+    # Updates overlay_pane by inferencing the latest frame.
+    def overlay_function(frame):
+        return frame
+
+    _overlay = overlay_function
+
+
+def _async_process():
+    while True:
+        _calculate_overlay(_frame)
+
+_async_process_t = Thread(target=_async_process)
+_async_process_t.start()
+
+
+def _async_overlay(frame):
+    global _frame
+    _frame = frame
+    return _overlay(frame)

@@ -25,40 +25,39 @@ If you're using an old coral board, you need to run "fastboot 0" through the boa
 cd $HOME/Downloads
 cd mendel-enterprise-day-13
 mdt reboot-bootloader # Is this really necessary?
-bash flash.sh
+bash flash.sh -H
 mdt wait-for-device && mdt shell
 ```
 
 
-... System hostname
-* ```nmtui```
-* 'Set system hostname to tree'
-* Don't connect it to wi-fi yet, we will wait until all filesystem junk has been handled first.
+... System hostname and Edit system hosts
 
-... Edit system hosts
 ```
+nmcli general hostname tree
 sudo sh -c 'echo "127.0.0.1       localhost
 ::1             localhost ip6-localhost ip6-loopback
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 127.0.0.1 tree" > /etc/hosts'
+echo ssh-rsa 'AAAAB3NzaC1yc2EAAAADAQABAAACAQChDeAOf7P8+4QA5uoULBl2DwPSkPJwNX0VrYCnqpXf/V/6Av68mGqJhNzmT7eYetmeOUxDBBwK0QGKrcY8gfpO8CnjgGx/R1ThXasSDV5Adz8+3j+VPWVaQBzMarukn+TfEm8g17MrXE+cx1VqJ+8AYMKxEPdPnowhPavGa/z1R3bUPL4yMLCyw50nmsq67kvxiFM8MFlbKBXpmLcpAwIOiLN7cp/g+S1SaIvcKY3kBraWLF3a7IfY1IEanmcbqaio8Y9OskCtZha11L1WbGS/xWd59MKTSOJteEV5zkVFEhy51aKtyoyWVK9/8DCa/vY37e1pta5SkMsB/0o7fbHT7tt/nVZHTlayLpNCSrk/DRnCpJlyUQRs+tB5UZahvoTIYnlQgCJ8WXsKiZGJDny9Lmnb9s3ZYllw0+2IECnzXANCOaq6I0zUmTw+4GMtb3f9wDxsdvOK8hUt/iSCHl580lh0htePdKxiee6VzLoaruQcwulje5+UJIwDinOGAC0/LBDnOb8FU4j/iN3Fjp99BQg9WztQaAqBc4PPRATUZOtmY2ajzCx0hMCKkGCfHdyUYx4qCz8JMT3G4O59pSgl8bSAqbMtsqzeBaeYrETv3QwHwjxmuWiHhwzk8wzTFVsGqrpXWhcwvfshrEX9vJRPfW6Rnl0nkCUD1s4lnw5JQQ== corcordp@mail.uc.edu' >> .ssh/authorized_keys
 sudo reboot now 
 ```
-... reboot with ```sudo reboot now``` then use ```mdt shell``` to log back in. 
  ... Find your SSH key with
 ```angular2html
-~/.ssh$ cat id_rsa.pub
+cat ~/.ssh/id_rsa.pub
 
-```
-... Add the SSH Keys with (Current as of May 23 2021)
-```
-echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQChDeAOf7P8+4QA5uoULBl2DwPSkPJwNX0VrYCnqpXf/V/6Av68mGqJhNzmT7eYetmeOUxDBBwK0QGKrcY8gfpO8CnjgGx/R1ThXasSDV5Adz8+3j+VPWVaQBzMarukn+TfEm8g17MrXE+cx1VqJ+8AYMKxEPdPnowhPavGa/z1R3bUPL4yMLCyw50nmsq67kvxiFM8MFlbKBXpmLcpAwIOiLN7cp/g+S1SaIvcKY3kBraWLF3a7IfY1IEanmcbqaio8Y9OskCtZha11L1WbGS/xWd59MKTSOJteEV5zkVFEhy51aKtyoyWVK9/8DCa/vY37e1pta5SkMsB/0o7fbHT7tt/nVZHTlayLpNCSrk/DRnCpJlyUQRs+tB5UZahvoTIYnlQgCJ8WXsKiZGJDny9Lmnb9s3ZYllw0+2IECnzXANCOaq6I0zUmTw+4GMtb3f9wDxsdvOK8hUt/iSCHl580lh0htePdKxiee6VzLoaruQcwulje5+UJIwDinOGAC0/LBDnOb8FU4j/iN3Fjp99BQg9WztQaAqBc4PPRATUZOtmY2ajzCx0hMCKkGCfHdyUYx4qCz8JMT3G4O59pSgl8bSAqbMtsqzeBaeYrETv3QwHwjxmuWiHhwzk8wzTFVsGqrpXWhcwvfshrEX9vJRPfW6Rnl0nkCUD1s4lnw5JQQ== corcordp@mail.uc.edu' >> .ssh/authorized_keys
 ```
 
 ... At this point, reboot the camera (```sudo reboot now```) and make sure your SSH keys work. You should be able to run this without a password. 
 ```
+  ssh-keygen -f "/home/daniel/.ssh/known_hosts" -R "tree.local"
 ssh mendel@tree.local
 ```
+you may need to run 
+```
+
+```
+If you have worked on a different board on this PC since they will have colliding hostnames
 
 ... format the SD card 
 ```
@@ -109,26 +108,23 @@ sudo swapon /home/mendel/sdcard/swapfile
 sudo echo " /dev/mmcblk1p1 /home/mendel/sdcard ext4 defaults 0 1" >> /etc/fstab
 sudo echo "/home/mendel/sdcard/swapfile none swap sw 0 0" >> /etc/fstab
 sudo echo "vm.swappiness=10" >> /etc/sysctl.conf
-```
 
+#Now we edit rc.local to add the bootup script
 
-... Now we edit rc.local to add the bootup script
-
-```
 sudo sh -c 'echo "#!/bin/bash -e
 chmod +x /home/mendel/sdcard/tree/bootloader.sh
 /bin/bash /home/mendel/sdcard/tree/bootloader.sh
 exit 0
 
 " > /etc/rc.local'
+
 sudo chmod +x /etc/rc.local
 
 ```
 
 debug mode
 ```
-alias debug="sudo pkill -9 python3; cd ~/sdcard/tree/; python3 boot.py"
-
+echo 'alias debug="sudo pkill -9 python3; cd ~/sdcard/tree/; python3 boot.py"' >> ~/.bashrc
 ```
 
 
@@ -145,12 +141,14 @@ rsync -avh seeOS/ mendel@tree.local:/home/mendel/sdcard/tree
 ```
 sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
 
-sh -c "yes | sudo pip3 install python-periphery https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_aarch64.whl"
+# TODO: THIS STEP MAY NOW BE UNNECESSARY AS MODERN OS HAS IT INCORPORATED!!!
+＃大切な！　これは必要じゃなくなった。最近のOSはTFLiteとpython-peripheryを予め持っている
+
 sudo apt-get -y install git build-essential cmake unzip pkg-config libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libgtk-3-dev libatlas-base-dev gfortran python3-dev python3-opencv
 sh -c "yes | sudo pip3 install flask waitress psutil imutils  flask-login PyOpenGL-accelerate  twilio imgurpython wget tornado terminado"
-dlib face_recognition
+# DONT RUN dlib face_recognition
 
-# At this point the tutorial is over and you can assemble the device. 
+# At this point the setup is over and you can assemble the device. 
 # TODO: Add assembly directions
 # TODO: Include LED and piezo test as part of setup process
 # Connect over wi-fi first before running this. We need to start setting up other boards. 

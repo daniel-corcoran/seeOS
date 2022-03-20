@@ -4,27 +4,32 @@ import face_recognition
 import imutils
 import pickle
 import cv2
-from twilio.rest import Client
-from imgurpython import ImgurClient
+from threading import Thread
 
-tw_account_sid = 'AC187864d6bb8a603665d83632571f02cc'
-tw_auth_token = '3d7951e1fc7ef42813c4e44ec9417654'
-tw_client = Client(tw_account_sid, tw_auth_token)
+#data = pickle.loads(open('programs/face_friend/encodings.pickle', "rb").read())
 
-im_client_id = 'd6464f94c8eea45'
-im_client_secret = 'db8c63ebe9477b934333a8f27fded489252a5e97'
+detector = None
+initialized = False
 
-im_client = ImgurClient(im_client_id, im_client_secret)
+def _initialize():
+    global detector
+    global initialized
+    try:
+        detector = cv2.CascadeClassifier('program/Facial_Recognition/haarcascade_frontalface_default.xml')
+        initialized = True
+        return {'initialized': True}
+    except Exception as E:
+        return {'initialized': False, 'err': E}
+
+def _destroy():
+    global detector
+    global initialized
+
+    detector = None
+    initialized = False
 
 
 
-data = pickle.loads(open('programs/face_friend/encodings.pickle', "rb").read())
-detector = cv2.CascadeClassifier('programs/face_friend/haarcascade_frontalface_default.xml')
-
-# initialize the video Video_Streaming and allow the camera sensor to warm up
-print("[INFO] starting video Video_Streaming...")
-vs = VideoStream(src=0).start()
-# vs = VideoStream(usePiCamera=True).start()
 
 queue = [None, None, None]
 # start the FPS counter
@@ -90,24 +95,7 @@ def generate():
         queue = queue[1:]
         print(queue)
 
-        if queue == [['Unknown'],['Unknown'],['Unknown']]:
-            try:
-                im = im_client.upload_from_path('pic.jpg')
-                url = im['link']
 
-
-                # Send a text
-                message = tw_client.messages \
-                    .create(
-                    body="Tree Camera detected an unknown face.",
-                    media_url=url,
-                    from_='+12058968162',
-                    to='+15138509006'
-                )
-
-                print(message.sid)
-            except Exception as E:
-                print(E)
         # loop over the recognized faces
         for ((top, right, bottom, left), name) in zip(boxes, names):
             # draw the predicted face name on the image
@@ -124,3 +112,47 @@ def generate():
 
 
 
+_frame = None
+
+
+def _overlay(frame):
+    return frame
+
+def _calculate_overlay(frame):
+    global _overlay
+
+    #frame = imutils.resize(frame, width=500)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    rects = detector.detectMultiScale(gray, scaleFactor=1.1,
+                                      minNeighbors=5, minSize=(30, 30),
+                                      flags=cv2.CASCADE_SCALE_IMAGE)
+
+    boxes = [(y, x + w, y + h, x) for (x, y, w, h) in rects]
+
+    # Updates overlay_pane by inferencing the latest frame.
+    def overlay_function(frame):
+
+        for (top, right, bottom, left) in boxes:
+            # draw the predicted face name on the image
+            cv2.rectangle(frame, (left, top), (right, bottom),
+                          (0, 255, 0), 2)
+
+        return frame
+
+    _overlay = overlay_function
+
+
+def _async_process():
+    while True:
+        if _frame is not None:
+            _calculate_overlay(_frame)
+
+
+_async_process_t = Thread(target=_async_process)
+_async_process_t.start()
+
+def _async_overlay(frame):
+    global _frame
+    _frame = frame
+    return _overlay(frame)

@@ -51,7 +51,6 @@
         margin-top: 5px;
         -moz-border-radius-topright: 50px;
         border-top-right-radius: 50px;
-                background-color: #FFFFFF;
 
     }
     #video {
@@ -90,12 +89,11 @@
     <table class="main-layout">
         <tr>
             <td class="left">
-                <div id="modeSelector" class="frameUnit">{% include 'frameUnit/_modeSelector.html' %}</div>
-                <div id="modeControl" class="frameUnit">{% include 'frameUnit/_modeControl.html' %}</div>
+                <div id="modeSelector">{% include 'frameUnit/_modeSelector.html' %}</div>
             </td>
             <td class="right">
                 <div id="video">{% include 'frameUnit/_video.html' %}</div>
-                <div id="videoControl">{% include 'frameUnit/_videoControl.html' %}</div>
+               <div id="videoControl">{% include 'frameUnit/_videoControl.html' %}</div>
             </td>
         </tr>
     </table>

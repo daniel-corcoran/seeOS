@@ -90,12 +90,11 @@ def frame_cap_daemon():
         # If ==, don't change the delay
 
         # print(f"FRAME {framecnt}")
-        framecnt += 1
         # print("A")
         a = datetime.datetime.now()
         camera_mutex.acquire()
         frame = orient_frame(vs.read())
-        frame = kernel._async_overlay(frame)
+        frame = kernel.__async_overlay(frame)
         suma += (datetime.datetime.now() - a)
 
         # print("B")
@@ -103,7 +102,6 @@ def frame_cap_daemon():
 
         # print("C")
         a = datetime.datetime.now()
-        #frame = imutils.resize(frame, width=720)  # To save bandwidth?
         camera_mutex.release()
 
         sumc += (datetime.datetime.now() - a)

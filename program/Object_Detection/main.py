@@ -1,4 +1,11 @@
-from edgetpu.detection.engine import DetectionEngine
+from PIL import Image
+from PIL import ImageDraw
+
+from pycoral.adapters import common
+from pycoral.adapters import detect
+from pycoral.utils.dataset import read_label_file
+from pycoral.utils.edgetpu import make_interpreter
+
 from imutils.video import VideoStream
 from PIL import Image
 import imutils
@@ -11,108 +18,118 @@ import cv2
 from threading import Thread
 
 
+
 confidence = 0.3
 # initialize the labels dictionary
-labels = {}
-for row in open('program/mobilenet_detect_demo/mobilenet_ssd_v2/coco_labels.txt'):
-	# unpack the row and update the labels dictionary
-	(classID, label) = row.strip().split(maxsplit=1)
-	labels[int(classID)] = label.strip()
-model = DetectionEngine('program/mobilenet_detect_demo/mobilenet_ssd_v2/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite')
 
-whitelist = []
-beep_mode = False
+labels = read_label_file('program/Object_Detection/mobilenet_ssd_v2/coco_labels.txt')
 
-def generate():
-	#####
-# loop over the frames from the video Video_Streaming
-	while True:
-		# grab the frame from the threaded video Video_Streaming and resize it
-		# to have a maximum width of 500 pixels
-		frame = vs.read()
-		frame = imutils.resize(frame, width=500)
-		orig = frame.copy()
+interpreter = None
+initialized = False
+async_process_t = None
 
-		# prepare the frame for classification by converting (1) it from
-		# BGR to RGB channel ordering and then (2) from a NumPy array to
-		# PIL image format
-		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-		frame = Image.fromarray(frame)
+def initialize():
+    global interpreter
+    global initialized
+    global async_process_t
+    try:
+        interpreter = make_interpreter(
+            'program/Object_Detection/mobilenet_ssd_v2/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite')
+        interpreter.allocate_tensors()
+        initialized = True
+        print("Initialized Object Detector")
+        async_process_t = Thread(target=_async_process)
+        async_process_t.start()
+        return {'initialized': True}
 
-		# make predictions on the input frame
-		start = time.time()
-		results = model.detect_with_image(frame, threshold=confidence,
-										keep_aspect_ratio=True, relative_coord=False)
-		end = time.time()
-		# ensure at least one result was found
-		for r in results:
-			# extract the bounding box and box and predicted class label
-			box = r.bounding_box.flatten().astype("int")
-			(startX, startY, endX, endY) = box
-			label = labels[r.label_id]
-			if label in whitelist:
-				if beep_mode:
-					b_tone()
-				# draw the bounding box and label on the image
-				cv2.rectangle(orig, (startX, startY), (endX, endY),
-							  (0, 255, 0), 2)
-				y = startY - 15 if startY - 15 > 15 else startY + 15
-				text = "{}: {:.2f}%".format(label, r.score * 100)
-				cv2.putText(orig, text, (startX, y),
-							cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    except Exception as E:
+        print(E)
+        return {'initialized': False, 'err': E}
 
-		cv2.imwrite('pic.jpg', orig)
-		yield (b'--frame\r\n'
-			   b'Content-Type: image/jpeg\r\n\r\n' + open('pic.jpg', 'rb').read() + b'\r\n')
+def _destroy():
+    global interpreter
+    global initialized
+    global async_process_t
 
-@app.route('/beeptoggle',  methods=["GET", "POST"])
-def beep_toggle():
-	global beep_mode
-	beep_mode = not beep_mode
-	return render_template('mobilenet_detect_demo/template.html', labels=[labels[x] for x in labels])
+    interpreter = None
+    initialized = False
+    async_process_t.join()
 
 
-@app.route('/update_checkbox', methods=["GET", "POST"])
-def update_checkbox():
-	print("Fixme")
-	x = request.form
-	print("Selected elements")
-	for i in list(x):
-		print(i)
-	global whitelist
-	whitelist = list(x)
-	cmd = [i for i in x]
-	print(cmd)
-	return render_template('mobilenet_detect_demo/template.html', labels = [labels[x] for x in labels])
+_overlayObjs = None
 
-
+_frame = None
 
 def _overlay(frame):
     return cv2.circle(frame, (100, 100), radius=100, thickness=-1, color=(255, 0, 0))
 
-def _calculate_overlay(frame):
-    global _overlay
 
+def _calculate_overlay(frame):
+    global _overlayObjs
+    global _overlay
     # Updates overlay_pane by inferencing the latest frame.
     # Runs on a mutex, so it will onyl run once at a time.
     # It runs in a thread so it is protecte
 
-    def overlay_function(frame):
-        print("Running overlay_function")
-        return cv2.circle(frame, (100, 100), radius=100, thickness=-1, color=(255, 0, 0))
+    # prepare the frame for classification by converting (1) it from
+    # BGR to RGB channel ordering and then (2) from a NumPy array to
+    # PIL image format
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = Image.fromarray(frame)
 
-    _overlay = overlay_function
+    start = time.perf_counter()
+    if initialized:
+        print("Initialized")
+        if interpreter is None:
+            print("Interpreter is none and this is initialized ERROR ERROR ERROR")
+        else:
+            print("Interpreter is not none")
+            print(interpreter)
+        _, scale = common.set_resized_input(
+            interpreter, frame.size, lambda size: frame.resize(size, Image.ANTIALIAS))
+
+        interpreter.invoke()
+        inference_time = time.perf_counter() - start
+        _overlayObjs = detect.get_objects(interpreter, confidence, scale)
+        print(_overlayObjs)
+        #print('%.2f ms' % (inference_time * 1000))
+
+        def overlay_function(frame):
+            # ensure at least one result was found
+            for obj in _overlayObjs:
+                bbox = obj.bbox
+                frame = cv2.rectangle(frame, (bbox.xmin, bbox.ymin), (bbox.xmax, bbox.ymax), (0, 0, 255), 2)
+                frame = cv2.putText(frame,
+                        '%s %.2f' % (labels.get(obj.id, obj.id), obj.score),
+                                    (bbox.xmin + 20, bbox.ymin + 20),
+                                    cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.5,
+                                    (0, 0, 255))
+                #draw.text((bbox.xmin + 10, bbox.ymin + 10),
+                #          '%s\n%.2f' % (labels.get(obj.id, obj.id), obj.score),
+                #          fill='red')
+
+            return frame
+
+        _overlay = overlay_function
+    else:
+        print("Uninitialized")
+
     # Do stuff to image
 
 
 def _async_process():
     # $ This is the "while loop" for the overlay calculator which triggers a new overlay when the previous one is done calculating.
-    while True:
-        _calculate_overlay(_frame)
+    while initialized:
+        if _frame is not None:
+            _calculate_overlay(_frame)
 
 
-_async_process_t = Thread(target=_async_process)
-_async_process_t.start()
+
+
+
+
+# Updates the frame within the app, doesn't mean it will actually get inferred though.
 
 def _async_overlay(frame):
     global _frame

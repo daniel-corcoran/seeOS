@@ -47,20 +47,6 @@ default_app = see_config['default_app']
 os.system('nohup python3 modules/terminal.py &')
 
 
-log.add_log('attempting to load default app: {}'.format(default_app))
-try:
-    #my_program = importlib.import_module('programs.{}.main'.format(default_app))
-    log.add_log('initial import of default app: {} was a success'.format(default_app))
-except Exception as E:
-    log.add_exception('import of {} failed, importing exceptionhandler.main instead. Exception: {}'.format(default_app, E))
-    my_program = importlib.import_module('exceptionhandler.ui')
-    with open("database/tmp/latest_logs", 'w') as f:
-        json.dumps({"logs": log.get_logs(), "exceptions": log.get_exceptions()})
-
-
-# TODO: Safely remove this.
-ir = False
-
 
 def exception_handler(e=None):
     # Start the exception handler if we can't load the main app.

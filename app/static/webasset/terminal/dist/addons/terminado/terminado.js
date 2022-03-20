@@ -1,5 +1,5 @@
 /**
- * This module provides methods for attaching a terminal to a terminado WebSocket stream.
+ * This module provides methods for attaching a terminal to a terminado WebSocket Video_Streaming.
  *
  * @module xterm/addons/terminado/terminado
  * @license MIT

@@ -1,41 +1,59 @@
 # Test program main file
-# The goal of this app is to technically demonstrate multi-threaded application process switcing
-# This app processes one frame per second. So, it should be significantly slower at processing than our frontend.
-# Accordingly, we want to show the latest inference on the current frame, not necessarily infer each frame.
-# So our application has a function to apply the "overlay" per se to the latest frame.
+# The goal of this app is to demonstrate multi-threaded video processing.
+
+
+
+# We want to show the latest inference on the current frame, not necessarily infer each frame (That would be too slow).
+# So our application updates the overlay as frequently possible
 
 import cv2
 from threading import Thread
 
 _frame = None
+async_process_t = None
+initialized = None
 
+def initialize():
+    global initialized
+    global async_process_t
+    try:
+        initialized = True
+        print("Initialized  Video Thread")
+        async_process_t = Thread(target=_async_process)
+        async_process_t.start()
+        return {'initialized': True}
 
+    except Exception as E:
+        print(E)
+        return {'initialized': False, 'err': E}
+
+def _destroy():
+    global initialized
+    global async_process_t
+    initialized = False
+    async_process_t.join()
+
+# This is the latest overlay
 def _overlay(frame):
-    return cv2.circle(frame, (100, 100), radius=100, thickness=-1, color=(255, 0, 0))
+    return frame
 
 def _calculate_overlay(frame):
     global _overlay
-
-    # Updates overlay_pane by inferencing the latest frame.
-    # Runs on a mutex, so it will onyl run once at a time.
-    # It runs in a thread so it is protecte
-
+    # Updates _overlay by inferencing the latest frame.
     def overlay_function(frame):
-        print("Running overlay_function")
-        return cv2.circle(frame, (100, 100), radius=100, thickness=-1, color=(255, 0, 0))
+        return frame
 
     _overlay = overlay_function
-    # Do stuff to image
 
 
 def _async_process():
     # $ This is the "while loop" for the overlay calculator which triggers a new overlay when the previous one is done calculating.
-    while True:
-        _calculate_overlay(_frame)
+    while initialized:
+        if _frame is not None:
+            _calculate_overlay(_frame)
 
 
-_async_process_t = Thread(target=_async_process)
-_async_process_t.start()
+
 
 def _async_overlay(frame):
     global _frame
