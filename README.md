@@ -172,7 +172,7 @@ If something in this section of the guide doesn't work, you may want to check ou
 ```shell
 cat ~/.ssh/id_rsa.pub
 ```
-and copy/paste it somewhere.
+and copy/paste it in a notepad file (you will need it in 2 steps).
 
 
 Now run this command in the terminal to connect to the device. 
@@ -197,14 +197,9 @@ sudo reboot now
 
 ... At this point, reboot the camera (```sudo reboot now```) and make sure your SSH keys work. You should be able to run this without a password. 
 ```
-  ssh-keygen -f "/home/daniel/.ssh/known_hosts" -R "tree.local"
+ssh-keygen -f "/home/daniel/.ssh/known_hosts" -R "tree.local"
 ssh mendel@tree.local
 ```
-you may need to run 
-```
-
-```
-If you have worked on a different board on this PC since they will have colliding hostnames
 
 ... format the SD card 
 ```
