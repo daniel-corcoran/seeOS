@@ -1,6 +1,6 @@
 from app import app
 from flask import render_template
-from tools.kiwilog import kiwi
+from modules.kiwilog import kiwi
 
 log = kiwi.instance('exceptionhandler.ui')
 

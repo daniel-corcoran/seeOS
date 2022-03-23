@@ -1,0 +1,219 @@
+<style>
+
+button:hover {
+box-shadow: 0 0 3px 1px rgb(236, 86, 164);
+}
+#videoControl {
+}
+#videoControl button {
+height: 150px;
+width: 150px;
+background-color: #ffffff;
+border-radius: 40px;
+}
+</style>
+<!-- These features haven't been implemented yet -->
+<!--<input id="time-interval" type="number" min="1" value="1">-->
+<!--<button id="Start interval" onclick="interval();">Interval</button>-->
+
+<script>
+var recording = {{ recording }}; // TODO: Get this from flask serving the page
+var color = true; // We toggle this while running recording_daemon
+var recording_daemon_interval;
+var leftovers_interval;
+var frame_buffer_interval;
+
+function check_frame_buffer(){
+    $.post("/frame_buffer_size",{},function(data,status){
+        console.log(`frame buffer length is ${data.frames} and size is ${data.size}`);
+    });
+}
+frame_buffer_interval = setInterval(check_frame_buffer, 1000);
+
+
+
+function check_recording_status(){
+    $.post("/recording_status_ajax", {}, function(data, status){
+        if(!recording && data.recording) {
+            // End recording
+            recording = true
+            document.getElementById("capture").hidden = true;
+            document.getElementById("gallery").hidden = true;
+            document.getElementById("record").innerText = `Recording ${data.duration}`;
+            recording_daemon();
+            recording_daemon_interval = setInterval(recording_daemon, 1000);
+
+        }else if(recording && !data.recording){
+
+            document.getElementById("record").style.backgroundColor = "";
+            document.getElementById("record").style.color = "";
+            document.getElementById("record").innerText = "Record";
+            document.getElementById("record").hidden = true;
+            clearInterval(recording_daemon_interval);
+            recording = false;
+
+        }else if(recording){
+            document.getElementById("record").innerText = `Recording ${data.duration}`;
+        }
+
+        // Make POST request and confirm response
+
+    })
+
+}
+check_recording_interval = setInterval(check_recording_status, 300);
+
+
+
+function capture(){
+    $.post("/capture",{},function(data,status){
+        console.log(`${data} and status is ${status}`)
+    });
+}
+
+function check_if_leftovers(){
+    console.log("Checking for leftovers")
+    $.post("/leftovers",{},function(data,status){
+        console.log(`LEFTOVERS: ${data} and status is ${status}`)
+        if(data.eating_leftovers){
+            if(recording){
+                document.getElementById("capture").hidden = true;
+                document.getElementById("gallery").hidden = true;
+                document.getElementById("record").hidden = false;
+                document.getElementById("leftovers").hidden = true
+            }else{
+
+                document.getElementById("capture").hidden = true;
+                document.getElementById("gallery").hidden = true;
+                document.getElementById("record").hidden = true;
+                document.getElementById("leftovers").hidden = false;
+
+            }
+            document.getElementById("num-leftovers").innerText = data.leftovers_remaining;
+        }else{
+            if(recording){
+                document.getElementById("capture").hidden = true;
+                document.getElementById("gallery").hidden = true;
+                document.getElementById("record").hidden = false;
+                document.getElementById("leftovers").hidden = true
+            }else{
+                document.getElementById("capture").hidden = false;
+                document.getElementById("gallery").hidden = false
+                document.getElementById("record").hidden = false;
+                document.getElementById("leftovers").hidden = true;
+                document.getElementById("record").src = 'static/webasset/img/record.png'
+
+            }
+
+
+
+        }
+    });
+}
+
+function recording_daemon(){
+    // FIXME: Need to show
+    if(color){
+        document.getElementById("record").src = 'static/webasset/img/record.png'
+        color = false;
+    }else{
+         document.getElementById("record").src = 'static/webasset/img/record_alt.png'
+
+        color = true;
+    }
+    // This function runs every second while we are recording.
+    // It updates the timer, and toggles the CSS.
+
+}
+function record(){
+    // the way this works is, we have a button record that triggers it.
+
+    if(recording){
+            // End recording
+            document.getElementById("record").style.backgroundColor = "";
+            document.getElementById("record").style.color = "";
+            document.getElementById("record").innerText = "Record";
+            document.getElementById("record").hidden = true;
+
+
+            clearInterval(recording_daemon_interval)
+            $.post("/stop_record",{},function(data,status){
+                console.log(`${data} and status is ${status}`)
+            });
+            recording = false;
+    }else{
+            // Start recording
+            recording = true;
+            document.getElementById("capture").hidden = true;
+            document.getElementById("gallery").hidden = true;
+            recording_daemon();
+            recording_daemon_interval = setInterval(recording_daemon, 1000);
+            // Make POST request and confirm response
+            $.post("/record",{},function(data,status){
+                console.log(`${data} and status is ${status}`)
+            });
+    }
+}
+leftovers_interval = setInterval(check_if_leftovers, 500)
+
+</script>
+
+<div id="frontendButtons">
+    <img src="static/webasset/img/photo.png" id="capture" onclick="capture()">
+    <img src="static/webasset/img/record.png" id="record" onclick="record();">
+    <img src="static/webasset/img/gallery.png" id="gallery" onclick="gallery();">
+    <button id="leftovers" hidden>Eating <span id="num-leftovers"></span> leftovers</button>
+    <img src="static/webasset/img/settings.png" id="settings" onclick="settings();">
+    <span id="frame-buffer"></span>
+
+</div>
+
+<span id="galleryAJAX"></span>
+<script>
+
+    var galleryUpdate = function(){
+      $.getJSON('/_gallery',
+          function(data){
+          console.log(data);
+            $('#galleryAJAX').html(data.html);
+      });
+      return false;
+};
+    var gallery = function(){
+        document.getElementById("frontendButtons").hidden = true;
+        galleryUpdate()
+    }
+</script>
+
+<span id="settingsAJAX"></span>
+<script>
+    var settingsUpdate = function(){
+      $.getJSON('/_settings',
+          function(data){
+          console.log(data);
+            $('#settingsAJAX').html(data.html);
+      });
+      return false;
+};
+    var settings = function(){
+        document.getElementById("frontendButtons").hidden = true;
+        settingsUpdate()
+    }
+
+
+    var deleteAll = function(){
+          $.getJSON('/_delete_all',
+          function(data){
+          console.log(data);
+          $('#galleryAJAX').html(data.html);
+      });
+      return false;
+
+    }
+    var home = function(){
+        $('#settingsAJAX').html('');
+        $('#galleryAJAX').html('');
+        document.getElementById("frontendButtons").hidden = false;
+    }
+</script>
+

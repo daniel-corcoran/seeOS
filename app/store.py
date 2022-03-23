@@ -1,9 +1,9 @@
 from app import app
 from flask import render_template, request
 import wget, json, base64, os
-from tools.install import install
-from tools.misc import default_app
-from tools.misc import list_apps
+from modules.install import install
+from modules.misc import default_app
+from modules.misc import list_apps
 store_ip = 'treecamera.xyz:8001'
 
 categories = {

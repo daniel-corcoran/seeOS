@@ -1,0 +1,86 @@
+
+<script>
+    // Make AJAX calls to switch the app
+
+function app_change_request(app){
+
+      $.getJSON('/_app_change_request', {
+        app: app
+      }, function(data) {
+        // Eventually we want to reflect on the front end that this has been replaced
+          //("#result").text(data.result);
+      });
+
+}
+
+</script>
+
+
+
+<form action = '/app_change_request' method = "post" enctype="multipart/form-data" class="change-app-form">
+
+    {% for item in list_apps %}
+        <span class="app-row">
+            <div class="border-banner-container"><a class="border-banner" onclick="app_change_request('{{ item }}')"><h2 class="app-name">{{ item }}</h2><img class="app-icon" src="static/appstatic/icon/{{item}}.jpg"></a></div>
+           <!--  <input class=border-banner type="image" src="static/appstatic/icon/{{item}}.jpg" name="switch {{ item }}" id="switch"> -->
+        </span>
+    {% endfor %}
+</form>
+<style>
+
+    .border-banner-container {
+        width: 100%;
+        text-align: right;
+    }
+#app_config_div {
+text-align: center;
+align-content: center;
+
+}
+.change-app-form {
+    width: 100%;
+}
+.app-row {
+    margin: 10%;
+}
+.app-name {
+    display:inline-block;
+    vertical-align: middle;
+}
+.app-icon {
+    border-radius 5px;
+    padding: 10px;
+    display: inline-block;
+    align: center;
+    vertical-align: middle;
+
+}
+
+.app-upload input {
+  display: none;
+    visibility: hidden;
+}
+.app-uninstall input {
+    display: none;
+    visibility: hidden;
+}
+body{
+        font-family:Arial;
+    font-size: 20px;
+}
+.border-banner{
+
+    border-radius: 30px;
+    width: 100%;
+    height: 100px;
+    text-align: left;
+    color: white;
+    padding: 10%;
+
+
+}
+
+.app-icon:hover {
+    box-shadow: 0 0 3px 1px rgb(236, 86, 164);
+}
+</style>

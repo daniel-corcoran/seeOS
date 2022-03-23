@@ -1,0 +1,13 @@
+<span id="modeSelectorAJAX"></span>
+<script>
+    var modeSelectorUpdate = function(){
+      $.getJSON('/_modeSelector',
+          function(data){
+          console.log(data);
+            $('#modeSelectorAJAX').html(data.html);
+      });
+      return false;
+};
+    modeSelectorUpdate()
+
+</script>
