@@ -37,7 +37,6 @@ def initialize():
             'program/Object_Detection/mobilenet_ssd_v2/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite')
         interpreter.allocate_tensors()
         initialized = True
-        print("Initialized Object Detector")
         async_process_t = Thread(target=_async_process)
         async_process_t.start()
         return {'initialized': True}

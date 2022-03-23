@@ -27,6 +27,16 @@ In its current state, this platform is in development, so only try to build it i
 
 We hope you enjoy using seeOS and look forward to a future where AI video processing technology is not a trope of dystopian science fiction but rather a useful tool by the people, for the people.
 
+
+#### Object Detection
+![object_detection](TreeCamera/static/seeOSUI2.png)
+
+#### Facial Recognition
+![facial_recognition](TreeCamera/static/seeOSUI2_facial_recognition.png)
+
+
+
+
 ### Requirements
 
   >1. A computer running Ubuntu 20
@@ -78,7 +88,7 @@ A point of focus in the future would be optimizing the tensile strength of the d
 #### E: 005_screw
 #### F: 003_shaft_base
 
-###3: Assemble Camera
+### 3: Assemble Camera
 
 #### Wire coal device according to this schematic: 
 ![schematic](TreeCamera/static/wiring.png)
@@ -106,12 +116,10 @@ A point of focus in the future would be optimizing the tensile strength of the d
 ![treeside](TreeCamera/static/treeside.png)
 
 
-####Tree Camera is now assembled. 
+#### Tree Camera is now assembled. 
 
-#Stage B: Configure your workstation
+# Stage B: Configure your workstation
 
-
-How to set up a new Tree Camera flashing host on a fresh Ubuntu 20 install
 
 1. [install MDT](https://coral.ai/docs/dev-board/get-started/#install-mdt)
 
@@ -129,39 +137,51 @@ How to set up a new Tree Camera flashing host on a fresh Ubuntu 20 install
 3. reboot
 > sudo reboot now
 
-#Step 3: Flash OS
+# Step 3: Flash OS
 
-todo: Convert this into a pre-built system image or script. This method is not sustainable!
 
-<h1>This is a working document. </h1>
-
-<h5>This document will instruct you to flash seeOS to a device. </h5>
-<h5>At the time of writing, the latest system build is 0.3.</h5>
+<h5>This document will instruct you to flash seeOS 0.6 to a device. </h5>
 
 
 <h3>Supplies</h3>
-<l>
-* Tree Camera device (Preferably, not inside a case, in case you need to access the board. Wait until device is fully functional to put in the case. Trust me!)
-* 3A USB type C PSU (Can probably get away with 2A)
-* USB type C connector (For data to host PC)
-* Ubuntu 20 host PC
+- Tree Camera device (Preferably, not inside a case, in case you need to access the board. Wait until device is fully functional to put in the case. Trust me!)
+- 2-3A USB type C PSU (Can probably get away with 2A)
+- additional USB type C cable for data
+- micro USB to issue serial commands
+- One microSD card with at least 16GB capacity
+- Ubuntu 20 host PC
+- a serial console program such as screen, picocom, or Putty
+  - ##### sudo apt install screen
+- The latest fastboot tool
+  - ##### sudo apt install fastboot
+  - ##### fastboot --version
 
 
 <h3>Directions</h3>
 
-If you're using an old coral board, you need to run "fastboot 0" through the boards serial console to run these commands. 
+since seeOS is built on top of mendel linux (the official supported distribution for the coral board), we first flash mendel linux to the board normally. 
 
-... Flash debian (assuming you have this system image)
+If something in this section of the guide doesn't work, you may want to check out the official [google coral setup guide.](https://coral.ai/docs/dev-board/reflash/#flash-a-new-board)
+
+#### 1. Flash mendel linux
+
+
+[Follow the guide at this page to flash mendel linux your coral dev board. ](https://coral.ai/docs/dev-board/reflash/#flash-a-new-board)
+
+ Find your SSH key with
+```shell
+cat ~/.ssh/id_rsa.pub
 ```
-cd $HOME/Downloads
-cd mendel-enterprise-day-13
-mdt reboot-bootloader # Is this really necessary?
-bash flash.sh -H
+and copy/paste it somewhere.
+
+
+Now run this command in the terminal to connect to the device. 
+```
 mdt wait-for-device && mdt shell
 ```
 
 
-... System hostname and Edit system hosts
+Once you are connected to the device, change the system hostname and edit the system hosts
 
 ```
 nmcli general hostname tree
@@ -170,14 +190,10 @@ sudo sh -c 'echo "127.0.0.1       localhost
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 127.0.0.1 tree" > /etc/hosts'
-echo ssh-rsa 'AAAAB3NzaC1yc2EAAAADAQABAAACAQChDeAOf7P8+4QA5uoULBl2DwPSkPJwNX0VrYCnqpXf/V/6Av68mGqJhNzmT7eYetmeOUxDBBwK0QGKrcY8gfpO8CnjgGx/R1ThXasSDV5Adz8+3j+VPWVaQBzMarukn+TfEm8g17MrXE+cx1VqJ+8AYMKxEPdPnowhPavGa/z1R3bUPL4yMLCyw50nmsq67kvxiFM8MFlbKBXpmLcpAwIOiLN7cp/g+S1SaIvcKY3kBraWLF3a7IfY1IEanmcbqaio8Y9OskCtZha11L1WbGS/xWd59MKTSOJteEV5zkVFEhy51aKtyoyWVK9/8DCa/vY37e1pta5SkMsB/0o7fbHT7tt/nVZHTlayLpNCSrk/DRnCpJlyUQRs+tB5UZahvoTIYnlQgCJ8WXsKiZGJDny9Lmnb9s3ZYllw0+2IECnzXANCOaq6I0zUmTw+4GMtb3f9wDxsdvOK8hUt/iSCHl580lh0htePdKxiee6VzLoaruQcwulje5+UJIwDinOGAC0/LBDnOb8FU4j/iN3Fjp99BQg9WztQaAqBc4PPRATUZOtmY2ajzCx0hMCKkGCfHdyUYx4qCz8JMT3G4O59pSgl8bSAqbMtsqzeBaeYrETv3QwHwjxmuWiHhwzk8wzTFVsGqrpXWhcwvfshrEX9vJRPfW6Rnl0nkCUD1s4lnw5JQQ== corcordp@mail.uc.edu' >> .ssh/authorized_keys
+echo ssh-rsa '<your SSH key from step 1> <your email address>' >> .ssh/authorized_keys
 sudo reboot now 
 ```
- ... Find your SSH key with
-```angular2html
-cat ~/.ssh/id_rsa.pub
 
-```
 
 ... At this point, reboot the camera (```sudo reboot now```) and make sure your SSH keys work. You should be able to run this without a password. 
 ```
@@ -269,14 +285,29 @@ rsync -avh seeOS/ mendel@tree.local:/home/mendel/sdcard/tree
 ... connect it to wifi using nmtui. 
 
 ```
-sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
+nmtui # Set up wifi here
 
+# Run these commands to download all dependencies. 
+
+sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
 sudo apt-get -y install git build-essential cmake unzip pkg-config libjpeg-dev libpng-dev libtiff-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libgtk-3-dev libatlas-base-dev gfortran python3-dev python3-opencv
-sh -c "yes | sudo pip3 install flask waitress psutil imutils  flask-login PyOpenGL-accelerate  twilio imgurpython wget tornado terminado dlib face_recognition"
+sh -c "yes | sudo pip3 install flask waitress psutil imutils  flask-login PyOpenGL-accelerate  twilio imgurpython wget tornado terminado"
+sudo nohup pip3 install dlib face_recognition & #(This takes hours to install)
+
 
 # At this point the setup is over and you can assemble the device. 
 
+
 ```
+
+<h1>Accessing seeOS</h1>
+With your PC and tree camera connected to the same wireless network (or connected via the Data port on the bottom of the camera) visit http://tree.local in your web browser. This should work on windows or linux. 
+
+If it doesn't load, use mdt shell to log into the board and run "debug". This will restart the application verbosely and run it on port 8000.
+
+
+
+
 <h1>Help</h1>
 Did something go wrong? If you cannot SSH into the board using MDT shell or SSH, connect using the USB serial port. Log in via this. Then run 
 

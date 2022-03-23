@@ -21,6 +21,10 @@ from modules.globals import getGlobalConfig
 
 from program.Video_Streaming import main as video_streaming
 from program.Object_Detection import main as object_detection
+from program.Facial_Recognition import main as facial_recognition
+from program.Motion_Detection import main as motion_detection
+
+
 from threading import Lock
 import time
 switch_app_mutex = False
@@ -34,18 +38,15 @@ default_app = see_config['default_app']
 
 
 
-# TODO: Now we are going to import all apps in the beginning and use a switch statement to determine where to get
-# Our stuff from .
-
-
-
-# If default app needs to be initialized then do that
-
+# TODO: This part needs to be abstracted/generalizable.
 if default_app == 'Video Streaming':
     video_streaming.initialize()
 elif default_app == 'Object Detection':
     object_detection.initialize()
-
+elif default_app == 'Motion Detection':
+    motion_detection.initialize()
+elif default_app == 'Facial Recognition':
+    facial_recognition.initialize()
 
 #
 #try:
@@ -67,18 +68,19 @@ def switch(target):
 
     while switch_app_mutex:
         time.sleep(0.1)
-    print("Switch has accessed the switch app spinlock")
     # Destroy currently running app and initialized new one
 
     if default_app == 'Video Streaming':
         video_streaming._destroy()
 
     elif default_app == 'Object Detection':
-        print("Destroying object detection inference engine")
         object_detection._destroy()
-        print("Object detection inference engine destroyed")
 
+    elif default_app == 'Facial Recognition':
+        facial_recognition._destroy()
 
+    elif default_app == 'Motion Detection':
+        motion_detection._destroy()
     default_app = target
 
     with open("database/see.json") as f:
@@ -92,6 +94,11 @@ def switch(target):
         video_streaming.initialize()
     elif default_app == 'Object Detection':
         object_detection.initialize()
+    elif default_app == 'Facial Recognition':
+        facial_recognition.initialize()
+    elif default_app == 'Motion Detection':
+        motion_detection.initialize()
+
     switch_app_mutex = False
 
 
@@ -99,10 +106,7 @@ def __async_overlay(frame):
     global switch_app_mutex
     while switch_app_mutex:
         time.sleep(0.1)
-    print("async overlay has accessed the switch app spinlock")
-    print(default_app)
     if default_app == 'Video Streaming':
-        print("Sending frame to Video Streaming Inference Function")
         try:
             return video_streaming._async_overlay(frame)
         except Exception as E:
@@ -110,9 +114,22 @@ def __async_overlay(frame):
             print(E)
             return None
     elif default_app == 'Object Detection':
-        print("Sending frame to Obj Detection Inference Function")
         try:
             return object_detection._async_overlay(frame)
+        except Exception as E:
+            print("Error 10456")
+            print(E)
+            return None
+    elif default_app == 'Motion Detection':
+        try:
+            return motion_detection._async_overlay(frame)
+        except Exception as E:
+            print("Error 10456")
+            print(E)
+            return None
+    elif default_app == 'Facial Recognition':
+        try:
+            return facial_recognition._async_overlay(frame)
         except Exception as E:
             print("Error 10456")
             print(E)
